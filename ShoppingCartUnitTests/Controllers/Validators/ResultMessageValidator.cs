@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShoppingCart.Shared.Dto;
 
-namespace ShoppingCartUnitTests.Controllers.Validators
+namespace ShoppingCart.UnitTests.Controllers.Validators
 {
     class ResultMessageValidator<T> : ResultObjectValidator<T, ResultMessage>
         where T : ObjectResult

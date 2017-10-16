@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShoppingCart.Shared.Model;
 
-namespace ShoppingCartUnitTests.Controllers.Validators
+namespace ShoppingCart.UnitTests.Controllers.Validators
 {
     class CartResultValidator : ResultObjectValidator<OkObjectResult, Cart>
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ShoppingCartUnitTests.Controllers.Validators
+namespace ShoppingCart.UnitTests.Controllers.Validators
 {
     class BadRequestResultValidator : ResultMessageValidator<BadRequestObjectResult>
     {

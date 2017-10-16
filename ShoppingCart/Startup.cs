@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ShoppingCart.Repository;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Model;
-using ShoppingCartRepository;
 
 namespace ShoppingCart
 {

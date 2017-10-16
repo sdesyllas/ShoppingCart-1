@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 
-namespace ShoppingCartUnitTests.Controllers.Validators
+namespace ShoppingCart.UnitTests.Controllers.Validators
 {
     class ResultObjectValidator<T, Q> : AbstractValidator<ActionResult>
         where T : ObjectResult

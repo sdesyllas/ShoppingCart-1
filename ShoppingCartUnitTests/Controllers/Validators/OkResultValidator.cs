@@ -1,7 +1,6 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ShoppingCartUnitTests.Controllers.Validators
+namespace ShoppingCart.UnitTests.Controllers.Validators
 {
     class OkResultValidator : ResultMessageValidator<OkObjectResult>
     {

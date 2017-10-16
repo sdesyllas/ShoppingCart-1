@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShoppingCart", "ShoppingCart\ShoppingCart.csproj", "{19EB9A34-7E42-4719-9FF1-7BE6F9600F36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCartUnitTests", "ShoppingCartUnitTests\ShoppingCartUnitTests.csproj", "{BE428D69-8C09-4688-A960-322B114E2647}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCart.UnitTests", "ShoppingCartUnitTests\ShoppingCart.UnitTests.csproj", "{BE428D69-8C09-4688-A960-322B114E2647}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShoppingCart.Shared", "ShoppingCartShared\ShoppingCart.Shared.csproj", "{9BC48B6A-0FBC-4EC9-B287-D4A656F2DC72}"
 EndProject

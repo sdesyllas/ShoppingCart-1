@@ -4,11 +4,10 @@ using Moq;
 using ShoppingCart.Controllers;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Model;
-using ShoppingCartUnitTests.Controllers.Validators;
+using ShoppingCart.UnitTests.Controllers.Validators;
 using SimpleFixture;
-using System.Collections.Generic;
 
-namespace ShoppingCartUnitTests.Controllers
+namespace ShoppingCart.UnitTests.Controllers
 {
     [TestClass]
     public class ShoppingBasketControllerTests
