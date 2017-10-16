@@ -4,6 +4,8 @@ using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 namespace ShoppingCart.Controllers
 {
@@ -34,6 +36,11 @@ namespace ShoppingCart.Controllers
             }        
 
             var cartDto = cartMapper.Map<CartDto>(cart);
+
+            if (cartDto.Items != null && cartDto.Items.Any(x => x.Product == null))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database state"));
+            }
 
             return Ok(cartDto);
         }

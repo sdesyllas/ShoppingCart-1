@@ -10,6 +10,7 @@ using ShoppingCart.Shared.Dto;
 using System.Linq;
 using ShoppingCart.Shared.Model;
 using AutoMapper;
+using System.Collections.Generic;
 
 namespace ShoppingCart.UnitTests.Controllers
 {
@@ -42,6 +43,34 @@ namespace ShoppingCart.UnitTests.Controllers
 
             // Assert
             new NotFoundResultValidator("Cart cart1 not found").ValidateAndThrow(response);
+        }
+
+        [TestMethod]
+        public async Task TestGetForInvalidBasketProduct()
+        {
+            var cartReposioryMock = new Mock<IRepository<Cart>>();
+            cartReposioryMock
+                .Setup(x => x.GetByName(It.IsAny<string>()))
+                .Returns(Task.FromResult(fixture.Generate<Cart>()));
+
+            var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
+            var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
+            var mapperMock = new Mock<IMapper>();
+            mapperMock.Setup(x => x.Map<CartDto>(It.IsAny<Cart>()))
+                .Returns(new CartDto() { Items = new List<CartItemDto>() { new CartItemDto() { Product = null } } });
+
+            mapperProvider.Setup(x => x.Provide())
+                .Returns(mapperMock.Object);
+
+            var controller = new ShoppingBasketController(cartReposioryMock.Object,
+                productReposioryMock.Object,
+                mapperProvider.Object);
+
+            // Act
+            var response = await controller.Get("cart1");
+
+            // Assert
+            new InternalServerErrorValidator("Inconsistent database state").ValidateAndThrow(response);
         }
 
         [TestMethod]
