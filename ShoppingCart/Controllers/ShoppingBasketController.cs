@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ShoppingCart.Shared;
+using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 
 namespace ShoppingCart.Controllers
@@ -20,7 +21,7 @@ namespace ShoppingCart.Controllers
             var cart = cartsReposiotry.GetByName(cartName);
             if (cart == null)
             {
-                return NotFound();
+                return NotFound(new ResultMessage($"Cart {cartName} not found")); 
             }
             return Ok(cart);
         }

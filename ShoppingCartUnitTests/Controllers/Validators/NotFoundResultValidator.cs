@@ -1,14 +1,14 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using ShoppingCart.Shared.Dto;
 
 namespace ShoppingCartUnitTests.Controllers.Validators
 {
-    public class NotFoundResultValidator : AbstractValidator<ActionResult>
+    public class NotFoundResultValidator : ResultObjectValidator<NotFoundObjectResult, ResultMessage>
     {
-        public NotFoundResultValidator()
+        public NotFoundResultValidator(string expectedMessage)
         {
-            RuleFor(x => x).NotNull();
-            RuleFor(x => x.GetType()).Equal(typeof(NotFoundResult));
+            RuleFor(x => extractValue(x).Message).Equal(expectedMessage);
         }
     }
 }

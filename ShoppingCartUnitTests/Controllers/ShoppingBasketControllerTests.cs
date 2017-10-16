@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Controllers;
@@ -21,10 +20,10 @@ namespace ShoppingCartUnitTests.Controllers
             var controller = new ShoppingBasketController(reposioryMock.Object);
 
             // Act
-            var response = controller.Get(string.Empty);
+            var response = controller.Get("cart1");
 
             // Assert
-            new NotFoundResultValidator().ValidateAndThrow(response);
+            new NotFoundResultValidator("Cart cart1 not found").ValidateAndThrow(response);
         }
 
         [TestMethod]
