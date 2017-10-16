@@ -5,6 +5,7 @@ using ShoppingCart.Controllers;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Model;
 using ShoppingCartUnitTests.Controllers.Validators;
+using SimpleFixture;
 using System.Collections.Generic;
 
 namespace ShoppingCartUnitTests.Controllers
@@ -12,6 +13,15 @@ namespace ShoppingCartUnitTests.Controllers
     [TestClass]
     public class ShoppingBasketControllerTests
     {
+
+        private Fixture fixture;
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            fixture = new Fixture();
+        }
+
         [TestMethod]
         public void TestGetForNotExistingBasket()
         {
@@ -32,19 +42,21 @@ namespace ShoppingCartUnitTests.Controllers
         public void TestGetForExistingBasket()
         {
             // Arrange
+            var cart = fixture.Generate<Cart>();
+
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             cartReposioryMock
-                .Setup(m => m.GetByName("test"))
-                .Returns(new Cart("test", new List<CartItem>()));
+                .Setup(m => m.GetByName(cart.Name))
+                .Returns(cart);
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object, productReposioryMock.Object);
 
             // Act
-            var response = controller.Get("test");
+            var response = controller.Get(cart.Name);
 
             // Assert
-            new CartResultValidator("test").ValidateAndThrow(response);
+            new CartResultValidator(cart.Name).ValidateAndThrow(response);
         }
 
         [TestMethod]
@@ -67,11 +79,8 @@ namespace ShoppingCartUnitTests.Controllers
         public void TestPutForNotExistingBasket()
         {
             // Arrange
-            var body = new CartItem()
-            {
-                ID = 10,
-                Quantity = 1
-            };
+            var body = fixture.Generate<CartItem>(constraints: new { Quantity = fixture.Generate<int>(constraints: new { min = 1 }) });
+
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
 
@@ -88,21 +97,19 @@ namespace ShoppingCartUnitTests.Controllers
         public void TestPutForNotExistingProduct()
         {
             // Arrange
-            var body = new CartItem()
-            {
-                ID = 10,
-                Quantity = 1
-            };
+            var body = fixture.Generate<CartItem>(constraints: new { Quantity = fixture.Generate<int>(constraints: new { min = 1 }) });
+            var cart = fixture.Generate<Cart>();
+
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             cartReposioryMock
-                .Setup(m => m.GetByName("cart1"))
-                .Returns(new Cart("cart1", new List<CartItem>()));
+                .Setup(m => m.GetByName(cart.Name))
+                .Returns(cart);
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object, productReposioryMock.Object);
 
             // Act
-            var response = controller.Put("cart1", body);
+            var response = controller.Put(cart.Name, body);
 
             // Assert
             new NotFoundResultValidator($"Product with id { body.ID } not found").ValidateAndThrow(response);
@@ -112,25 +119,24 @@ namespace ShoppingCartUnitTests.Controllers
         public void TestPutForNotEnoughQuantitiy()
         {
             // Arrange
-            var body = new CartItem()
-            {
-                ID = 10,
-                Quantity = 100
-            };
+            var body = fixture.Generate<CartItem>(constraints: new { Quantity = 10 });
+            var cart = fixture.Generate<Cart>();
+            var product = fixture.Generate<Product>(constraints: new { Stock = 5 });
+
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             cartReposioryMock
-                .Setup(m => m.GetByName("cart1"))
-                .Returns(new Cart("cart1", new List<CartItem>()));
+                .Setup(m => m.GetByName(cart.Name))
+                .Returns(cart);
 
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             productReposioryMock
-                .Setup(m => m.GetById(10))
-                .Returns(new Product() { Stock = 9 });
+                .Setup(m => m.GetById(body.ID))
+                .Returns(product);
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object, productReposioryMock.Object);
 
             // Act
-            var response = controller.Put("cart1", body);
+            var response = controller.Put(cart.Name, body);
 
             // Assert
             new BadRequestResultValidator("Not enough quantity").ValidateAndThrow(response);
@@ -139,17 +145,14 @@ namespace ShoppingCartUnitTests.Controllers
         public void TestPutForNegativeQuantity()
         {
             // Arrange
-            var body = new CartItem()
-            {
-                ID = 10,
-                Quantity = -1
-            };
+            var body = fixture.Generate<CartItem>(constraints: new { Quantity = -1 });
+
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             var controller = new ShoppingBasketController(cartReposioryMock.Object, productReposioryMock.Object);
 
             // Act
-            var response = controller.Put("cart1", body);
+            var response = controller.Put(string.Empty, body);
 
             // Assert
             new BadRequestResultValidator("Invalid quantity").ValidateAndThrow(response);
@@ -159,26 +162,24 @@ namespace ShoppingCartUnitTests.Controllers
         public void TestPutForSuccess()
         {
             // Arrange
-            var body = new CartItem()
-            {
-                ID = 10,
-                Quantity = 100
-            };
-            var cart = new Cart("cart1", new List<CartItem>());
+            var body = fixture.Generate<CartItem>(constraints: new { Quantity = 10 });
+            var cart = fixture.Generate<Cart>();
+            var product = fixture.Generate<Product>(constraints: new { Stock = 10 });
+
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             cartReposioryMock
-                .Setup(m => m.GetByName("cart1"))
+                .Setup(m => m.GetByName(cart.Name))
                 .Returns(cart);
 
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             productReposioryMock
-                .Setup(m => m.GetById(10))
-                .Returns(new Product() { Stock = 101 });
+                .Setup(m => m.GetById(body.ID))
+                .Returns(product);
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object, productReposioryMock.Object);
 
             // Act
-            var response = controller.Put("cart1", body);
+            var response = controller.Put(cart.Name, body);
 
             // Assert
             new OkResultValidator("Product added").ValidateAndThrow(response);
