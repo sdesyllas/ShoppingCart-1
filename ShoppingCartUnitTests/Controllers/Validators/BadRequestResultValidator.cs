@@ -2,9 +2,9 @@
 
 namespace ShoppingCartUnitTests.Controllers.Validators
 {
-    class NotFoundResultValidator : ResultMessageValidator<NotFoundObjectResult>
+    class BadRequestResultValidator : ResultMessageValidator<BadRequestObjectResult>
     {
-        public NotFoundResultValidator(string expectedMessage)
+        public BadRequestResultValidator(string expectedMessage)
             : base(expectedMessage)
         { }
     }

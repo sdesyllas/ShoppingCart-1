@@ -1,4 +1,5 @@
-﻿using ShoppingCart.Shared.Model;
+﻿using ShoppingCart.Shared;
+using ShoppingCart.Shared.Model;
 using System.Collections.Generic;
 
 namespace ShoppingCartRepository

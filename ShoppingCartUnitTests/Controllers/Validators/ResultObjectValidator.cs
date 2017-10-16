@@ -1,12 +1,10 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ShoppingCartUnitTests.Controllers.Validators
 {
-    public class ResultObjectValidator<T, Q> : AbstractValidator<ActionResult>
+    class ResultObjectValidator<T, Q> : AbstractValidator<ActionResult>
         where T : ObjectResult
         where Q : class
     {

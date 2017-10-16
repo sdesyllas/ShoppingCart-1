@@ -4,7 +4,7 @@ using ShoppingCart.Shared.Model;
 
 namespace ShoppingCartUnitTests.Controllers.Validators
 {
-    public class CartResultValidator : ResultObjectValidator<OkObjectResult, Cart>
+    class CartResultValidator : ResultObjectValidator<OkObjectResult, Cart>
     {
         public CartResultValidator(string cartName)
         {
