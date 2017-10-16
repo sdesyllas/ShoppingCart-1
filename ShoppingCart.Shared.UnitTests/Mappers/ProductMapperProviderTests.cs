@@ -30,5 +30,19 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             // Assert
             new ProductDtoMappedValidator(product).ValidateAndThrow(result);
         }
+
+        [TestMethod]
+        public void TestProductMapperProviderMapperMapsNullValue()
+        {
+            // Arrange
+            var product = fixture.Generate<Product>();
+            var mapper = new ProductMapperProvider().Provide();
+
+            // Act
+            var result = mapper.Map<CartProductDto>(null);
+
+            // Assert
+            Assert.IsNull(result);
+        }
     }
 }
