@@ -21,4 +21,10 @@
     <ProjectReference Include="..\ShoppingCartShared\ShoppingCart.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\products.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

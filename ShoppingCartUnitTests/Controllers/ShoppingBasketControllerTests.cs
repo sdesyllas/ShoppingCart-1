@@ -186,5 +186,6 @@ namespace ShoppingCart.UnitTests.Controllers
         }
 
         //TODO test quantity aggeregation
+        //Put to closed basket
     }
 }

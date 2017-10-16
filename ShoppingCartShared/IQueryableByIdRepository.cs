@@ -1,6 +1,4 @@
-﻿using ShoppingCart.Shared.Model;
-
-namespace ShoppingCart.Shared
+﻿namespace ShoppingCart.Shared
 {
     public interface IQueryableByIdRepository<T> : IRepository<T>
     {

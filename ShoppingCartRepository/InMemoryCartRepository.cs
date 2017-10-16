@@ -7,7 +7,7 @@ namespace ShoppingCart.Repository
 {
     public class InMemoryCartRepository : IRepository<Cart>
     {
-        private readonly List<Cart> baskets;
+        private readonly IEnumerable<Cart> baskets;
 
         public InMemoryCartRepository(IDataProvider<Cart> dataProvider)
         {

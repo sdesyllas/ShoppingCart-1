@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ShoppingCart.Shared.Model
+﻿namespace ShoppingCart.Shared.Model
 {
     public class Product
     {
@@ -10,6 +6,15 @@ namespace ShoppingCart.Shared.Model
         public string Name { get; }
         public string Description { get; }
         public decimal Price { get; }
-        public decimal Stock { get; set; }
+        public int Stock { get; set; }
+
+        public Product(long Identifier, string Name, string Description, decimal Price, int Stock)
+        {
+            ID = Identifier;
+            this.Name = Name;
+            this.Description = Description;
+            this.Price = Price;
+            this.Stock = Stock;
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace ShoppingCart.Repository
 {
     public class StaticCartProvider : IDataProvider<Cart>
     {
-        public List<Cart> Provide()
+        public IEnumerable<Cart> Provide()
         {
             return new List<Cart>()
             {
