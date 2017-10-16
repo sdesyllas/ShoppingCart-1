@@ -2,7 +2,7 @@
 using ShoppingCart.Shared.Model;
 using System.Collections.Generic;
 
-namespace ShoppingCartRepository
+namespace ShoppingCart.Repository
 {
     public class StaticCartProvider : IDataProvider<Cart>
     {

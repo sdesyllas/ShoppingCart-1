@@ -3,7 +3,7 @@ using ShoppingCart.Shared.Model;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ShoppingCartRepository
+namespace ShoppingCart.Repository
 {
     public class InMemoryCartRepository : IRepository<Cart>
     {
