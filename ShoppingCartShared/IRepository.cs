@@ -1,7 +1,9 @@
-﻿namespace ShoppingCart.Shared
+﻿using System.Threading.Tasks;
+
+namespace ShoppingCart.Shared
 {
     public interface IRepository<T>
     {
-        T GetByName(string name);
+        Task<T> GetByName(string name);
     }
 }

@@ -5,6 +5,7 @@ using ShoppingCart.Shared.Model;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ShoppingCart.Repository
 {
@@ -19,7 +20,7 @@ namespace ShoppingCart.Repository
             this.dataFileName = dataFileName;
         }
 
-        public IEnumerable<Product> Provide()
+        public async Task<IEnumerable<Product>> Provide()
         {
             var file = fileProvider.GetFileInfo(dataFileName);
             using (FileStream stream = (FileStream)file.CreateReadStream())
@@ -30,7 +31,7 @@ namespace ShoppingCart.Repository
                     {
                         csvReader.Configuration.HasHeaderRecord = true;
                         csvReader.Configuration.CultureInfo = System.Globalization.CultureInfo.GetCultureInfo("en-US");
-                        return csvReader.GetRecords<Product>().ToList();
+                        return await Task.Run(() => csvReader.GetRecords<Product>().ToList());
                     }
                 }
             }

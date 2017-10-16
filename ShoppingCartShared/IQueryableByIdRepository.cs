@@ -1,7 +1,9 @@
-﻿namespace ShoppingCart.Shared
+﻿using System.Threading.Tasks;
+
+namespace ShoppingCart.Shared
 {
     public interface IQueryableByIdRepository<T> : IRepository<T>
     {
-        T GetById(long id);
+        Task<T> GetById(long id);
     }
 }

@@ -2,6 +2,7 @@
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
+using System.Threading.Tasks;
 
 namespace ShoppingCart.Controllers
 {
@@ -18,9 +19,9 @@ namespace ShoppingCart.Controllers
         }
 
         [HttpGet("{cartName}")]
-        public ActionResult Get(string cartName)
+        public async Task<ActionResult> Get(string cartName)
         {
-            var cart = cartsRepository.GetByName(cartName);
+            var cart = await cartsRepository.GetByName(cartName);
             if (cart == null)
             {
                 return NotFound(new ResultMessage($"Cart {cartName} not found"));
@@ -29,7 +30,7 @@ namespace ShoppingCart.Controllers
         }
 
         [HttpPut("{cartName}")]
-        public ActionResult Put(string cartName, [FromBody] CartItem item)
+        public async Task<ActionResult> Put(string cartName, [FromBody] CartItem item)
         {
             if(item == null)
             {
@@ -41,13 +42,13 @@ namespace ShoppingCart.Controllers
                 return BadRequest(new ResultMessage("Invalid quantity"));
             }
 
-            var cart = cartsRepository.GetByName(cartName);
+            var cart = await cartsRepository.GetByName(cartName);
             if(cart == null)
             {
                 return NotFound(new ResultMessage($"Cart {cartName} not found"));
             }
 
-            var product = productsRepository.GetById(item.ID);
+            var product = await productsRepository.GetById(item.ID);
             if (product == null)
             {
                 return NotFound(new ResultMessage($"Product with id {item.ID} not found"));
