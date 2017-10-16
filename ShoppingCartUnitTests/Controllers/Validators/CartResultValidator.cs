@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using ShoppingCart.Shared.Model;
+using ShoppingCart.Shared.Dto;
 
 namespace ShoppingCart.UnitTests.Controllers.Validators
 {
-    class CartResultValidator : ResultObjectValidator<OkObjectResult, Cart>
+    class CartResultValidator : ResultObjectValidator<OkObjectResult, CartDto>
     {
         public CartResultValidator(string cartName)
         {

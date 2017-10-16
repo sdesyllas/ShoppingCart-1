@@ -1,10 +1,10 @@
 ﻿namespace ShoppingCart.Shared.Dto
 {
-    public class ResultMessage
+    public class ResultMessageDto
     {
         public string Message { get; private set; }
         
-        public ResultMessage(string message)
+        public ResultMessageDto(string message)
         {
             Message = message;
         }

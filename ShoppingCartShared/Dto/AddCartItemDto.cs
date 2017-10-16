@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ShoppingCart.Shared.Dto
 {
-    public class CartItem
+    public class AddCartItemDto
     {
-        public decimal Quantity { get; set; }
-        public Product Product { get; set; }
+        public int Quantity { get; set; }
+        public long ID { get; set; }
     }
 }

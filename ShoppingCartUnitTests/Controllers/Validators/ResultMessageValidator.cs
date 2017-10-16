@@ -4,7 +4,7 @@ using ShoppingCart.Shared.Dto;
 
 namespace ShoppingCart.UnitTests.Controllers.Validators
 {
-    class ResultMessageValidator<T> : ResultObjectValidator<T, ResultMessage>
+    class ResultMessageValidator<T> : ResultObjectValidator<T, ResultMessageDto>
         where T : ObjectResult
     {
         public ResultMessageValidator(string expectedMessage)

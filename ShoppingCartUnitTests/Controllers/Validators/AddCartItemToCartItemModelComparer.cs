@@ -8,12 +8,12 @@ namespace ShoppingCart.UnitTests.Controllers.Validators
     {
         public int Compare(object x, object y)
         {
-            if(!(x is AddCartItem && y is CartItemModel))
+            if(!(x is AddCartItemDto && y is CartItemModel))
             {
                 return -1;
             }
 
-            AddCartItem body = (AddCartItem)x;
+            AddCartItemDto body = (AddCartItemDto)x;
             CartItemModel collectionElement = (CartItemModel)y;
             
             if(body.ID != collectionElement.ID)

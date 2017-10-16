@@ -4,9 +4,10 @@ using System.Text;
 
 namespace ShoppingCart.Shared.Dto
 {
-    public class AddCartItem
+    public class CartDto
     {
-        public int Quantity { get; set; }
-        public int ID { get; set; }
+        public string Name { get; set; }
+
+        public List<CartItemDto> Items { get; set; }
     }
 }
