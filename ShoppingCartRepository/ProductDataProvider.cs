@@ -11,18 +11,18 @@ namespace ShoppingCart.Repository
 {
     public class ProductDataProvider : IDataProvider<Product>
     {
-        private readonly IFileProvider fileProvider;
-        private readonly string dataFileName;
+        private readonly IFileProvider _fileProvider;
+        private readonly string _dataFileName;
 
         public ProductDataProvider(IFileProvider fileProvider, string dataFileName)
         {
-            this.fileProvider = fileProvider;
-            this.dataFileName = dataFileName;
+            this._fileProvider = fileProvider;
+            this._dataFileName = dataFileName;
         }
 
-        public async Task<IEnumerable<Product>> Provide()
+        public async Task<IEnumerable<Product>> ProvideAsync()
         {
-            var file = fileProvider.GetFileInfo(dataFileName);
+            var file = _fileProvider.GetFileInfo(_dataFileName);
             using (FileStream stream = (FileStream)file.CreateReadStream())
             {
                 using (StreamReader reader = new StreamReader(stream))

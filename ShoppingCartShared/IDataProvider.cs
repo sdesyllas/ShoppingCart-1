@@ -5,6 +5,6 @@ namespace ShoppingCart.Shared
 {
     public interface IDataProvider<T>
     {
-        Task<IEnumerable<T>> Provide();
+        Task<IEnumerable<T>> ProvideAsync();
     }
 }

@@ -4,6 +4,6 @@ namespace ShoppingCart.Shared
 {
     public interface IRepository<T>
     {
-        Task<T> GetByName(string name);
+        Task<T> GetByNameAsync(string name);
     }
 }

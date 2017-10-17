@@ -8,31 +8,31 @@ namespace ShoppingCart
 {
     public class InMemoryProductReposiotry : IQueryableByIdRepository<Product>
     {
-        private readonly IDataProvider<Product> dataProvider;
-        private IEnumerable<Product> products;
+        private readonly IDataProvider<Product> _dataProvider;
+        private IEnumerable<Product> _products;
 
         public InMemoryProductReposiotry(IDataProvider<Product> dataProvider)
         {
-            this.dataProvider = dataProvider;
+            this._dataProvider = dataProvider;
         }
 
-        public async Task<Product> GetById(long id)
+        public async Task<Product> GetByIdAsync(long id)
         {
-            await EnsureData();
-            return products.FirstOrDefault(x => x.ID == id);
+            await EnsureDataAsync();
+            return _products.FirstOrDefault(x => x.ID == id);
         }
 
-        public async Task<Product> GetByName(string name)
+        public async Task<Product> GetByNameAsync(string name)
         {
-            await EnsureData();
-            return products.FirstOrDefault(x => x.Name == name);
+            await EnsureDataAsync();
+            return _products.FirstOrDefault(x => x.Name == name);
         }
 
-        private async Task EnsureData()
+        private async Task EnsureDataAsync()
         {
-            if(products == null)
+            if(_products == null)
             {
-                products = await dataProvider.Provide();
+                _products = await _dataProvider.ProvideAsync();
             }
         }
     }

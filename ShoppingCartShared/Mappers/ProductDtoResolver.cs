@@ -7,22 +7,22 @@ namespace ShoppingCart.Shared.Mappers
 {
     public class ProductDtoResolver : IValueResolver<CartItem, CartItemDto, CartProductDto>
     {
-        private readonly IQueryableByIdRepository<Product> productsRepository;
-        private readonly IMapper mapper;
+        private readonly IQueryableByIdRepository<Product> _productsRepository;
+        private readonly IMapper _mapper;
 
         public ProductDtoResolver(IQueryableByIdRepository<Product> productsRepository, IMapperProvider<Product, CartProductDto> mapper)
         {
-            this.productsRepository = productsRepository;
-            this.mapper = mapper.Provide();
+            this._productsRepository = productsRepository;
+            this._mapper = mapper.Provide();
         }
 
         public CartProductDto Resolve(CartItem source, CartItemDto destination, CartProductDto destMember, ResolutionContext context)
         {
             var model = Task
-                .Run(async () => await productsRepository.GetById(source.ID))
+                .Run(async () => await _productsRepository.GetByIdAsync(source.ID))
                 .Result;
 
-            return mapper.Map<CartProductDto>(model);
+            return _mapper.Map<CartProductDto>(model);
         }
     }
 }

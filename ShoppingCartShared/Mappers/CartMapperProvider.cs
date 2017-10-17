@@ -6,11 +6,11 @@ namespace ShoppingCart.Shared.Mappers
 {
     public class CartMapperProvider : IMapperProvider<Cart, CartDto>
     {
-        private readonly IValueResolver<CartItem, CartItemDto, CartProductDto> productValueResolver;
+        private readonly IValueResolver<CartItem, CartItemDto, CartProductDto> _productValueResolver;
 
         public CartMapperProvider(IValueResolver<CartItem, CartItemDto, CartProductDto> productValueResolver)
         {
-            this.productValueResolver = productValueResolver;
+            this._productValueResolver = productValueResolver;
         }
 
         public IMapper Provide()
@@ -19,7 +19,7 @@ namespace ShoppingCart.Shared.Mappers
             {
                 cfg.CreateMap<Cart, CartDto>();
                 cfg.CreateMap<CartItem, CartItemDto>()
-                .ForMember(x => x.Product, opt => opt.ResolveUsing(productValueResolver));
+                .ForMember(x => x.Product, opt => opt.ResolveUsing(_productValueResolver));
             }).CreateMapper();
         }
     }

@@ -7,7 +7,7 @@ namespace ShoppingCart.Repository
 {
     public class StaticCartProvider : IDataProvider<Cart>
     {
-        public async Task<IEnumerable<Cart>> Provide()
+        public async Task<IEnumerable<Cart>> ProvideAsync()
         {
             return await Task.FromResult(new List<Cart>()
             {

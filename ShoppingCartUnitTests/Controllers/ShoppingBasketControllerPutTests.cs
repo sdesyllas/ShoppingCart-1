@@ -76,7 +76,7 @@ namespace ShoppingCart.UnitTests.Controllers
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             cartReposioryMock
-                .Setup(m => m.GetByName(cart.Result.Name))
+                .Setup(m => m.GetByNameAsync(cart.Result.Name))
                 .Returns(cart);
             var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
 
@@ -101,12 +101,12 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             cartReposioryMock
-                .Setup(m => m.GetByName(cart.Result.Name))
+                .Setup(m => m.GetByNameAsync(cart.Result.Name))
                 .Returns(cart);
 
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             productReposioryMock
-                .Setup(m => m.GetById(body.ID))
+                .Setup(m => m.GetByIdAsync(body.ID))
                 .Returns(product);
 
             var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
@@ -152,12 +152,12 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var cartReposioryMock = new Mock<IRepository<Cart>>();
             cartReposioryMock
-                .Setup(m => m.GetByName(cart.Result.Name))
+                .Setup(m => m.GetByNameAsync(cart.Result.Name))
                 .Returns(cart);
 
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             productReposioryMock
-                .Setup(m => m.GetById(body.ID))
+                .Setup(m => m.GetByIdAsync(body.ID))
                 .Returns(product);
 
             var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();

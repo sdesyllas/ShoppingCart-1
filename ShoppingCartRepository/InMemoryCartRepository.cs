@@ -8,25 +8,25 @@ namespace ShoppingCart.Repository
 {
     public class InMemoryCartRepository : IRepository<Cart>
     {
-        private readonly IDataProvider<Cart> dataProvider;
-        private IEnumerable<Cart> baskets;
+        private readonly IDataProvider<Cart> _dataProvider;
+        private IEnumerable<Cart> _baskets;
 
         public InMemoryCartRepository(IDataProvider<Cart> dataProvider)
         {
-            this.dataProvider = dataProvider;
+            this._dataProvider = dataProvider;
         }
 
-        public async Task<Cart> GetByName(string name)
+        public async Task<Cart> GetByNameAsync(string name)
         {
-            await EnsureData();
-            return baskets.FirstOrDefault(x => x.Name == name);
+            await EnsureDataAsync();
+            return _baskets.FirstOrDefault(x => x.Name == name);
         }
 
-        private async Task EnsureData()
+        private async Task EnsureDataAsync()
         {
-            if (baskets == null)
+            if (_baskets == null)
             {
-                baskets = await dataProvider.Provide();
+                _baskets = await _dataProvider.ProvideAsync();
             }
         }
     }

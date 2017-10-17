@@ -13,29 +13,29 @@ namespace ShoppingCart.Controllers
     [Route("api/[controller]")]
     public class ShoppingBasketController : Controller
     {
-        private readonly IRepository<Cart> cartsRepository;
-        private readonly IQueryableByIdRepository<Product> productsRepository;
-        private readonly IMapper cartMapper;
+        private readonly IRepository<Cart> _cartsRepository;
+        private readonly IQueryableByIdRepository<Product> _productsRepository;
+        private readonly IMapper _cartMapper;
 
         public ShoppingBasketController(IRepository<Cart> cartsRepository,
             IQueryableByIdRepository<Product> productsRepository,
             IMapperProvider<Cart, CartDto> cartMapperProvider)
         {
-            this.cartsRepository = cartsRepository;
-            this.productsRepository = productsRepository;
-            this.cartMapper = cartMapperProvider.Provide();
+            this._cartsRepository = cartsRepository;
+            this._productsRepository = productsRepository;
+            this._cartMapper = cartMapperProvider.Provide();
         }
 
         [HttpGet("{cartName}")]
         public async Task<ActionResult> Get(string cartName)
         {
-            var cart = await cartsRepository.GetByName(cartName);
+            var cart = await _cartsRepository.GetByNameAsync(cartName);
             if (cart == null)
             {
                 return NotFound(new ResultMessageDto($"Cart {cartName} not found"));
             }        
 
-            var cartDto = cartMapper.Map<CartDto>(cart);
+            var cartDto = _cartMapper.Map<CartDto>(cart);
 
             if (cartDto.Items != null && cartDto.Items.Any(x => x.Product == null))
             {
@@ -58,13 +58,13 @@ namespace ShoppingCart.Controllers
                 return BadRequest(new ResultMessageDto("Invalid quantity"));
             }
 
-            var cart = await cartsRepository.GetByName(cartName);
+            var cart = await _cartsRepository.GetByNameAsync(cartName);
             if(cart == null)
             {
                 return NotFound(new ResultMessageDto($"Cart {cartName} not found"));
             }
 
-            var product = await productsRepository.GetById(item.ID);
+            var product = await _productsRepository.GetByIdAsync(item.ID);
             if (product == null)
             {
                 return NotFound(new ResultMessageDto($"Product with id {item.ID} not found"));
