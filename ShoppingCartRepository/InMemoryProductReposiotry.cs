@@ -19,7 +19,7 @@ namespace ShoppingCart
         public async Task<Product> GetByIdAsync(long id)
         {
             await EnsureDataAsync();
-            return _products.FirstOrDefault(x => x.ID == id);
+            return _products.FirstOrDefault(x => x.Id == id);
         }
 
         public async Task<Product> GetByNameAsync(string name)

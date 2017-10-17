@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace ShoppingCart.Shared.Dto
 {
@@ -8,6 +6,6 @@ namespace ShoppingCart.Shared.Dto
     {
         public string Name { get; set; }
 
-        public List<CartItemDto> Items { get; set; }
+        public ICollection<CartItemDto> Items { get; set; }
     }
 }

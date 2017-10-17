@@ -19,7 +19,7 @@ namespace ShoppingCart.Shared.Mappers
         public CartProductDto Resolve(CartItem source, CartItemDto destination, CartProductDto destMember, ResolutionContext context)
         {
             var model = Task
-                .Run(async () => await _productsRepository.GetByIdAsync(source.ID))
+                .Run(async () => await _productsRepository.GetByIdAsync(source.ProductId))
                 .Result;
 
             return _mapper.Map<CartProductDto>(model);

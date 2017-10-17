@@ -69,10 +69,10 @@ namespace ShoppingCart.Controllers
                 return BadRequest(new ResultMessageDto("Cart is checked out"));
             }
 
-            var product = await _productsRepository.GetByIdAsync(item.ID);
+            var product = await _productsRepository.GetByIdAsync(item.ProductId);
             if (product == null)
             {
-                return NotFound(new ResultMessageDto($"Product with id {item.ID} not found"));
+                return NotFound(new ResultMessageDto($"Product with id {item.ProductId} not found"));
             }
 
             if (product.Stock < item.Quantity)
@@ -82,7 +82,7 @@ namespace ShoppingCart.Controllers
 
             CartItem model = new CartItem()
             {
-                ID = item.ID,
+                ProductId = item.ProductId,
                 Quantity = item.Quantity
             };
             cart.Items.Add(model);
@@ -111,12 +111,12 @@ namespace ShoppingCart.Controllers
             }
 
             var groupedItems = cart.Items
-                .GroupBy(x => x.ID)
+                .GroupBy(x => x.ProductId)
                 .Select(x => new
                 {
                     Id = x.Key,
                     CartSum = x.Sum(y => y.Quantity),
-                    Product = products.First(prod => prod.ID == x.Key)
+                    Product = products.First(prod => prod.Id == x.Key)
                 })
                 .ToList();
 
@@ -134,7 +134,7 @@ namespace ShoppingCart.Controllers
         private async Task<IEnumerable<Product>> GetProductsFromCartItems(Cart cart)
         {
             var productTasks = cart.Items
-                .Select(x => x.ID)
+                .Select(x => x.ProductId)
                 .Distinct()
                 .Select(_productsRepository.GetByIdAsync);
             return await Task.WhenAll(productTasks);

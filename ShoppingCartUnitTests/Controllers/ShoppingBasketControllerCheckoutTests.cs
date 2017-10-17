@@ -65,7 +65,7 @@ namespace ShoppingCart.UnitTests.Controllers
         {
             // Arrange
             fixture.Customize<Product>().Set(x => x.Stock, 10);
-            fixture.Customize<CartItem>().Set(x => x.Quantity, 6).Set(x => x.ID, 2);
+            fixture.Customize<CartItem>().Set(x => x.Quantity, 6).Set(x => x.ProductId, 2);
             fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
             fixture.Customize<Cart>().Set(x => x.Items, new List<CartItem>()
             {
@@ -153,10 +153,10 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return200AndReduceStocks_When_CheckedOut()
         {
             // Arrange
-            fixture.Customize<Product>().Set(x => x.Stock, 10).Set(x => x.ID, 2);
+            fixture.Customize<Product>().Set(x => x.Stock, 10).Set(x => x.Id, 2);
             var product = fixture.Generate<Product>();
 
-            fixture.Customize<CartItem>().Set(x => x.Quantity, 4).Set(x => x.ID, product.ID);
+            fixture.Customize<CartItem>().Set(x => x.Quantity, 4).Set(x => x.ProductId, product.Id);
             fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
             fixture.Customize<Cart>().Set(x => x.Items, new List<CartItem>()
             {
@@ -169,7 +169,7 @@ namespace ShoppingCart.UnitTests.Controllers
 
             cartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
                 .ReturnsAsync(cart);
-            productReposioryMock.Setup(x => x.GetByIdAsync(product.ID))
+            productReposioryMock.Setup(x => x.GetByIdAsync(product.Id))
                 .ReturnsAsync(product);
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,

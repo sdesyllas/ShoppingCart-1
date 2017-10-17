@@ -30,7 +30,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
 
             // Assert
             result.Description.Should().Be(product.Description);
-            result.ID.Should().Be(product.ID);
+            result.Id.Should().Be(product.Id);
             result.Name.Should().Be(product.Name);
             result.Price.Should().Be(product.Price);
         }

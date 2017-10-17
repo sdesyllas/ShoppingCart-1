@@ -86,8 +86,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             foreach (var item in cart.Result.Items)
                 productReposioryMock
-                    .Setup(m => m.GetByIdAsync(item.ID))
-                    .Returns(Task.FromResult(fixture.Generate<Product>(constraints: new { Identifier = item.ID })));
+                    .Setup(m => m.GetByIdAsync(item.ProductId))
+                    .Returns(Task.FromResult(fixture.Generate<Product>(constraints: new { Identifier = item.ProductId })));
             
             mapperMock.Setup(m => m.Map<CartDto>(cart.Result))
                 .Returns(new CartDto() { Name = cart.Result.Name } );

@@ -7,6 +7,6 @@ namespace ShoppingCart.Shared.Dto
     public class AddCartItemDto
     {
         public int Quantity { get; set; }
-        public long ID { get; set; }
+        public long ProductId { get; set; }
     }
 }

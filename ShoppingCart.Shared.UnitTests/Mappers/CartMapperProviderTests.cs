@@ -36,7 +36,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             // Assert
             result.Should().NotBeNull();
             result.Name.Should().Be(cart.Name);
-            result.Items.Select(x => x.Product.ID).Should().BeEquivalentTo(cart.Items.Select(x => x.ID));
+            result.Items.Select(x => x.Product.Id).Should().BeEquivalentTo(cart.Items.Select(x => x.ProductId));
         }
 
         private CartProductDto MapCartProduct(CartItem ci,
@@ -44,7 +44,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             CartProductDto cpDto,
             ResolutionContext rContext)
         {
-            return fixture.Generate<CartProductDto>(constraints: new { ID = ci.ID });
+            return fixture.Generate<CartProductDto>(constraints: new { Id = ci.ProductId });
         }
     }
 }

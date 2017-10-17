@@ -6,11 +6,11 @@ namespace ShoppingCart.Shared.Model
     {
         public string Name { get; private set; }
 
-        public List<CartItem> Items { get; set; }
+        public ICollection<CartItem> Items { get; set; }
 
         public bool IsCheckedOut { get; set; }
 
-        public Cart(string name, List<CartItem> items)
+        public Cart(string name, ICollection<CartItem> items)
         {
             Name = name;
             Items = items;

@@ -2,7 +2,7 @@
 {
     public class Product
     {
-        public long ID { get; }
+        public long Id { get; }
         public string Name { get; }
         public string Description { get; }
         public decimal Price { get; }
@@ -10,7 +10,7 @@
 
         public Product(long Identifier, string Name, string Description, decimal Price, int Stock)
         {
-            ID = Identifier;
+            Id = Identifier;
             this.Name = Name;
             this.Description = Description;
             this.Price = Price;

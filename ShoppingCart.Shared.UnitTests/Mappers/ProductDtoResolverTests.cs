@@ -34,7 +34,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             var cartItem = fixture.Generate<CartItem>();
             
             mapperMock.Setup(x => x.Map<CartProductDto>(It.IsAny<Product>()))
-                .Returns<Product>(x => fixture.Generate<CartProductDto>(constraints: new { ID = x.ID }));
+                .Returns<Product>(x => fixture.Generate<CartProductDto>(constraints: new { Id = x.Id }));
             
             mapperProviderMock.Setup(x => x.Provide())
                 .Returns(mapperMock.Object);
@@ -49,7 +49,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
 
             // Assert
             cartItem.Should().NotBeNull();
-            cartItem.ID.Should().Be(cartItem.ID);
+            cartItem.ProductId.Should().Be(cartItem.ProductId);
         }
 
         [TestMethod]

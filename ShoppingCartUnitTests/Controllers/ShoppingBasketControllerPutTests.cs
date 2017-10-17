@@ -87,7 +87,7 @@ namespace ShoppingCart.UnitTests.Controllers
 
             // Assert
             response.AssertResponseType<NotFoundObjectResult>(404)
-                .AssertMessage($"Product with id { body.ID } not found");
+                .AssertMessage($"Product with id { body.ProductId } not found");
         }
 
         [TestMethod]
@@ -105,7 +105,7 @@ namespace ShoppingCart.UnitTests.Controllers
                 .Returns(cart);
 
             productReposioryMock
-                .Setup(m => m.GetByIdAsync(body.ID))
+                .Setup(m => m.GetByIdAsync(body.ProductId))
                 .Returns(product);
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
@@ -145,6 +145,7 @@ namespace ShoppingCart.UnitTests.Controllers
         {
             // Arrange
             fixture.Customize<Cart>().Set(x => x.IsCheckedOut, true);
+            fixture.Customize<AddCartItemDto>().Set(x => x.Quantity, 1);
 
             var body = fixture.Generate<AddCartItemDto>();
             var cart = Task.FromResult(fixture.Generate<Cart>());
@@ -179,7 +180,7 @@ namespace ShoppingCart.UnitTests.Controllers
                 .Returns(cart);
 
             productReposioryMock
-                .Setup(m => m.GetByIdAsync(body.ID))
+                .Setup(m => m.GetByIdAsync(body.ProductId))
                 .Returns(product);
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
@@ -193,7 +194,7 @@ namespace ShoppingCart.UnitTests.Controllers
             var cartResponse = response.AssertResponseType<OkObjectResult>(200)
                 .AssertMessage("Product added");
 
-            cart.Result.Items.Should().Contain(x => x.ID == body.ID && x.Quantity == body.Quantity);
+            cart.Result.Items.Should().Contain(x => x.ProductId == body.ProductId && x.Quantity == body.Quantity);
         }
     }
 }
