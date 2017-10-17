@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Controllers;
@@ -18,6 +19,7 @@ namespace ShoppingCart.UnitTests.Controllers
         private Mock<IRepository<Cart>> cartReposioryMock;
         private Mock<IQueryableByIdRepository<Product>> productReposioryMock;
         private Mock<IMapperProvider<Cart, CartDto>> mapperProviderMock;
+        private Mock<ILogger<ShoppingBasketController>> loggerMock;
 
         [TestInitialize]
         public void Initialize()
@@ -26,6 +28,7 @@ namespace ShoppingCart.UnitTests.Controllers
             cartReposioryMock = new Mock<IRepository<Cart>>();
             productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             mapperProviderMock = new Mock<IMapperProvider<Cart, CartDto>>();
+            loggerMock = new Mock<ILogger<ShoppingBasketController>>();
         }
 
         [TestMethod]
@@ -34,7 +37,8 @@ namespace ShoppingCart.UnitTests.Controllers
             // Arrange
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Put("cart1", null);
@@ -54,7 +58,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Put("cart1", body);
@@ -80,7 +85,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Put(cart.Result.Name, body);
@@ -110,14 +116,15 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Put(cart.Result.Name, body);
 
             // Assert
             response.AssertResponseType<BadRequestObjectResult>(400)
-                .AssertMessage("Not enough quantity");
+                .AssertMessage("Not enough stock");
         }
 
         [TestMethod]
@@ -130,7 +137,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Put(string.Empty, body);
@@ -155,7 +163,8 @@ namespace ShoppingCart.UnitTests.Controllers
             
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Put(cart.Result.Name, body);
@@ -185,7 +194,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Put(cart.Result.Name, body);

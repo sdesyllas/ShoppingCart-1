@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Controllers;
@@ -22,6 +23,7 @@ namespace ShoppingCart.UnitTests.Controllers
         private Mock<IQueryableByIdRepository<Product>> productReposioryMock;
         private Mock<IMapperProvider<Cart, CartDto>> mapperProviderMock;
         private Mock<IMapper> mapperMock;
+        private Mock<ILogger<ShoppingBasketController>> loggerMock;
 
         [TestInitialize]
         public void Initialize()
@@ -30,6 +32,7 @@ namespace ShoppingCart.UnitTests.Controllers
             cartReposioryMock = new Mock<IRepository<Cart>>();
             productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             mapperProviderMock = new Mock<IMapperProvider<Cart, CartDto>>();
+            loggerMock = new Mock<ILogger<ShoppingBasketController>>();
             mapperMock = new Mock<IMapper>();
         }
 
@@ -39,7 +42,8 @@ namespace ShoppingCart.UnitTests.Controllers
             // Arrange
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Get("cart1");
@@ -64,14 +68,15 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Get("cart1");
 
             // Assert
             response.AssertResponseType<ObjectResult>(500)
-                .AssertMessage("Inconsistent database state");
+                .AssertMessage("Inconsistent database");
         }
 
         [TestMethod]
@@ -98,7 +103,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Get(cart.Result.Name);

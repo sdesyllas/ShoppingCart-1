@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Controllers;
@@ -21,6 +22,7 @@ namespace ShoppingCart.UnitTests.Controllers
         private Mock<IRepository<Cart>> cartReposioryMock;
         private Mock<IQueryableByIdRepository<Product>> productReposioryMock;
         private Mock<IMapperProvider<Cart, CartDto>> mapperProviderMock;
+        private Mock<ILogger<ShoppingBasketController>> loggerMock;
         private Mock<IMapper> mapperMock;
 
         [TestInitialize]
@@ -30,6 +32,7 @@ namespace ShoppingCart.UnitTests.Controllers
             cartReposioryMock = new Mock<IRepository<Cart>>();
             productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             mapperProviderMock = new Mock<IMapperProvider<Cart, CartDto>>();
+            loggerMock = new Mock<ILogger<ShoppingBasketController>>();
             mapperMock = new Mock<IMapper>();
         }
 
@@ -51,7 +54,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Checkout(cart.Name);
@@ -83,7 +87,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Checkout(cart.Name);
@@ -105,7 +110,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             var response = await controller.Checkout(cart.Name);
 
@@ -126,7 +132,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Checkout(cart.Result.Name);
@@ -140,7 +147,11 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return404_When_BasketDoesNotExist()
         {
             // Arrange
-            var controller = new ShoppingBasketController(cartReposioryMock.Object, productReposioryMock.Object, mapperProviderMock.Object);
+            var controller = new ShoppingBasketController(
+                cartReposioryMock.Object,
+                productReposioryMock.Object,
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Checkout("cart1");
@@ -174,7 +185,8 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProviderMock.Object);
+                mapperProviderMock.Object,
+                loggerMock.Object);
 
             // Act
             var response = await controller.Checkout(cart.Name);
