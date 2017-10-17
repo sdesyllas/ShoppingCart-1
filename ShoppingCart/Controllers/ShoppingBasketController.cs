@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace ShoppingCart.Controllers
 {
@@ -16,19 +17,24 @@ namespace ShoppingCart.Controllers
         private readonly IRepository<Cart> _cartsRepository;
         private readonly IQueryableByIdRepository<Product> _productsRepository;
         private readonly IMapper _cartMapper;
+        private readonly ILogger _logger;
 
         public ShoppingBasketController(IRepository<Cart> cartsRepository,
             IQueryableByIdRepository<Product> productsRepository,
-            IMapperProvider<Cart, CartDto> cartMapperProvider)
+            IMapperProvider<Cart, CartDto> cartMapperProvider,
+            ILogger<ShoppingBasketController> logger)
         {
-            this._cartsRepository = cartsRepository;
-            this._productsRepository = productsRepository;
-            this._cartMapper = cartMapperProvider.Provide();
+            _cartsRepository = cartsRepository;
+            _productsRepository = productsRepository;
+            _cartMapper = cartMapperProvider.Provide();
+            _logger = logger;
         }
 
         [HttpGet("{cartName}")]
         public async Task<ActionResult> Get(string cartName)
         {
+            _logger.LogDebug($"Get called with parameter: {cartName}");
+
             var cart = await _cartsRepository.GetByNameAsync(cartName);
             if (cart == null)
             {
@@ -39,7 +45,7 @@ namespace ShoppingCart.Controllers
 
             if (cartDto.Items != null && cartDto.Items.Any(x => x.Product == null))
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database state"));
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database"));
             }
 
             return Ok(cartDto);
@@ -48,7 +54,9 @@ namespace ShoppingCart.Controllers
         [HttpPut("{cartName}")]
         public async Task<ActionResult> Put(string cartName, [FromBody] AddCartItemDto item)
         {
-            if(item == null)
+            _logger.LogDebug($"Put called with parameter: {cartName}");
+
+            if (item == null)
             {
                 return BadRequest(new ResultMessageDto("Empty body"));
             }
@@ -93,6 +101,8 @@ namespace ShoppingCart.Controllers
         [HttpGet("{cartName}/Checkout")]
         public async Task<ActionResult> Checkout(string cartName)
         {
+            _logger.LogDebug($"Checkout called with parameter: {cartName}");
+
             var cart = await _cartsRepository.GetByNameAsync(cartName);
             if (cart == null)
             {
