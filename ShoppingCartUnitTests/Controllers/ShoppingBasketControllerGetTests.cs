@@ -37,20 +37,22 @@ namespace ShoppingCart.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task Should_Return400_When_BasketDoesNotExist()
+        public async Task Should_Return404_When_BasketDoesNotExist()
         {
             // Arrange
+            mapperProviderMock.Setup(x => x.Provide())
+                .Returns(mapperMock.Object);
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
                 mapperProviderMock.Object,
                 loggerMock.Object);
 
             // Act
-            var response = await controller.Get("cart1");
+            var response = await controller.GetAsync("cart1");
 
             // Assert
             response.AssertResponseType<NotFoundObjectResult>(404)
-               .AssertMessage("Cart cart1 not found");
+               .AssertMessage("Cart not found");
         }
 
         [TestMethod]
@@ -72,7 +74,7 @@ namespace ShoppingCart.UnitTests.Controllers
                 loggerMock.Object);
 
             // Act
-            var response = await controller.Get("cart1");
+            var response = await controller.GetAsync("cart1");
 
             // Assert
             response.AssertResponseType<ObjectResult>(500)
@@ -107,7 +109,7 @@ namespace ShoppingCart.UnitTests.Controllers
                 loggerMock.Object);
 
             // Act
-            var response = await controller.Get(cart.Result.Name);
+            var response = await controller.GetAsync(cart.Result.Name);
 
             // Assert
             response.AssertResponseType<OkObjectResult>(200)

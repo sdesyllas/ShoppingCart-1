@@ -66,7 +66,7 @@ namespace ShoppingCart.UnitTests.Controllers
 
             // Assert
             response.AssertResponseType<NotFoundObjectResult>(404)
-                .AssertMessage("Cart cart1 not found");
+                .AssertMessage("Cart not found");
         }
 
         [TestMethod]

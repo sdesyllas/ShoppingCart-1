@@ -115,7 +115,7 @@ namespace ShoppingCart.UnitTests.Controllers
 
             var response = await controller.Checkout(cart.Name);
 
-            response.AssertResponseType<BadRequestObjectResult>(400).AssertMessage("Cart already checked out");
+            response.AssertResponseType<BadRequestObjectResult>(400).AssertMessage("Cart is checked out");
         }
 
         [TestMethod]

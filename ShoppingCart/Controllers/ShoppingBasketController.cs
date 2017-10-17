@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Net;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ShoppingCart.Controllers
 {
@@ -19,6 +18,7 @@ namespace ShoppingCart.Controllers
         private readonly IRepository<Cart> _cartsRepository;
         private readonly IQueryableByIdRepository<Product> _productsRepository;
         private readonly IMapper _cartMapper;
+        private readonly IMapper _cartItemMapper;
         private readonly ILogger _logger;
 
         public ShoppingBasketController(IRepository<Cart> cartsRepository,
@@ -30,30 +30,36 @@ namespace ShoppingCart.Controllers
             _productsRepository = productsRepository;
             _cartMapper = cartMapperProvider.Provide();
             _logger = logger;
+            _cartItemMapper = new MapperConfiguration(cfg => cfg.CreateMap<AddCartItemDto, CartItem>()).CreateMapper();
         }
 
         [HttpGet("{cartName}")]
         [SwaggerResponse(200, typeof(CartDto), "Cart exists")]
         [SwaggerResponse(404, typeof(ResultMessageDto), "Cart not found")]
         [SwaggerResponse(500, typeof(ResultMessageDto), "Cart contains item with invalid product")]
-        public async Task<ActionResult> Get(string cartName)
+        public async Task<ActionResult> GetAsync(string cartName)
         {
             _logger.LogDebug($"Get called with parameter: {cartName}");
 
             var cart = await _cartsRepository.GetByNameAsync(cartName);
+            var cartDto = _cartMapper.Map<CartDto>(cart);
+
+            return ValidateForGetCart(cart, cartDto) ?? Ok(cartDto);
+        }
+
+        private ActionResult ValidateForGetCart(Cart cart, CartDto cartDto)
+        {
             if (cart == null)
             {
-                return NotFound(new ResultMessageDto($"Cart {cartName} not found"));
-            }        
-
-            var cartDto = _cartMapper.Map<CartDto>(cart);
+                return NotFound(new ResultMessageDto("Cart not found"));
+            }
 
             if (cartDto.Items != null && cartDto.Items.Any(x => x.Product == null))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database"));
             }
 
-            return Ok(cartDto);
+            return null;
         }
 
         [HttpPut("{cartName}")]
@@ -64,20 +70,36 @@ namespace ShoppingCart.Controllers
         {
             _logger.LogDebug($"Put called with parameter: {cartName}");
 
-            if (item == null)
+            var addItemValidationResult = ValidateForAddItem(item);
+            if(addItemValidationResult != null)
             {
-                return BadRequest(new ResultMessageDto("Empty body"));
-            }
-
-            if(item.Quantity <= 0)
-            {
-                return BadRequest(new ResultMessageDto("Invalid quantity"));
+                return addItemValidationResult;
             }
 
             var cart = await _cartsRepository.GetByNameAsync(cartName);
-            if(cart == null)
+            var cartValidationResult = ValidateCart(cart);
+            if(cartValidationResult != null)
             {
-                return NotFound(new ResultMessageDto($"Cart {cartName} not found"));
+                return cartValidationResult;
+            }
+
+            var stockValidationResult = await ValidateStockAsync(item);
+            if(stockValidationResult != null)
+            {
+                return stockValidationResult;
+            }
+
+            var model =_cartItemMapper.Map<CartItem>(item);
+            cart.Items.Add(model);
+
+            return Ok(new ResultMessageDto("Product added"));
+        }
+
+        private ActionResult ValidateCart(Cart cart)
+        {
+            if (cart == null)
+            {
+                return NotFound(new ResultMessageDto($"Cart not found"));
             }
 
             if (cart.IsCheckedOut)
@@ -85,6 +107,26 @@ namespace ShoppingCart.Controllers
                 return BadRequest(new ResultMessageDto("Cart is checked out"));
             }
 
+            return null;
+        }
+
+        public ActionResult ValidateForAddItem(AddCartItemDto item)
+        {
+            if (item == null)
+            {
+                return BadRequest(new ResultMessageDto("Empty body"));
+            }
+
+            if (item.Quantity <= 0)
+            {
+                return BadRequest(new ResultMessageDto("Invalid quantity"));
+            }
+
+            return null;
+        }
+
+        public async Task<ActionResult> ValidateStockAsync(AddCartItemDto item)
+        {
             var product = await _productsRepository.GetByIdAsync(item.ProductId);
             if (product == null)
             {
@@ -96,14 +138,7 @@ namespace ShoppingCart.Controllers
                 return BadRequest(new ResultMessageDto("Not enough stock"));
             }
 
-            CartItem model = new CartItem()
-            {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity
-            };
-            cart.Items.Add(model);
-
-            return Ok(new ResultMessageDto("Product added"));
+            return null;
         }
 
         [HttpGet("{cartName}/Checkout")]
@@ -115,17 +150,34 @@ namespace ShoppingCart.Controllers
             _logger.LogDebug($"Checkout called with parameter: {cartName}");
 
             var cart = await _cartsRepository.GetByNameAsync(cartName);
-            if (cart == null)
+            var cartValidationResult = ValidateCart(cart);
+            if (cartValidationResult != null)
             {
-                return NotFound(new ResultMessageDto("Cart not found"));
+                return cartValidationResult;
             }
 
-            if (cart.IsCheckedOut)
+            var products = await GetProductsFromCartItems(cart.Items);
+            var cartStockValidationResult = ValidateCartStock(cart, products);
+            if (cartStockValidationResult != null)
             {
-                return BadRequest(new ResultMessageDto("Cart already checked out"));
+                return cartStockValidationResult;
             }
 
-            var products = await GetProductsFromCartItems(cart);
+            Checkout(cart, products);
+
+            return Ok(new ResultMessageDto("Cart checked out"));
+        }
+
+        private void Checkout(Cart cart, IEnumerable<Product> products)
+        {
+            cart.Items
+                .ToList()
+                .ForEach(x => products.First(p => p.Id == x.ProductId).Stock -= x.Quantity);
+            cart.IsCheckedOut = true;
+        }
+
+        private ActionResult ValidateCartStock(Cart cart, IEnumerable<Product> products)
+        {
             if (products.Any(x => x == null))
             {
                 return NotFound(new ResultMessageDto("Cart product not found"));
@@ -146,15 +198,12 @@ namespace ShoppingCart.Controllers
                 return BadRequest(new ResultMessageDto("Items out of stock"));
             }
 
-            groupedItems.ForEach(x => x.Product.Stock -= x.CartSum);
-            cart.IsCheckedOut = true;
-
-            return Ok(new ResultMessageDto("Cart checked out"));
+            return null;
         }
 
-        private async Task<IEnumerable<Product>> GetProductsFromCartItems(Cart cart)
+        private async Task<IEnumerable<Product>> GetProductsFromCartItems(IEnumerable<CartItem> items)
         {
-            var productTasks = cart.Items
+            var productTasks = items
                 .Select(x => x.ProductId)
                 .Distinct()
                 .Select(_productsRepository.GetByIdAsync);
