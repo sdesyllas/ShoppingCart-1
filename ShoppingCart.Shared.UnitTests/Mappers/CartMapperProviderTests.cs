@@ -1,13 +1,12 @@
-﻿
-using AutoMapper;
-using FluentValidation;
+﻿using AutoMapper;
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Mappers;
 using ShoppingCart.Shared.Model;
-using ShoppingCart.Shared.UnitTests.Mappers.Validators;
 using SimpleFixture;
+using System.Linq;
 
 namespace ShoppingCart.Shared.UnitTests.Mappers
 {
@@ -35,7 +34,9 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             var result = mapper.Map<CartDto>(cart);
 
             // Assert
-            new CartDtoValidator(cart.Items).ValidateAndThrow(result);
+            result.Should().NotBeNull();
+            result.Name.Should().Be(cart.Name);
+            result.Items.Select(x => x.Product.ID).Should().BeEquivalentTo(cart.Items.Select(x => x.ID));
         }
 
         private CartProductDto MapCartProduct(CartItem ci,

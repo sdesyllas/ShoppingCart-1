@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+﻿using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Mappers;
@@ -11,6 +11,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
     public class ProductMapperProviderTests
     {
         private Fixture fixture;
+
         [TestInitialize]
         public void Initialize()
         {
@@ -28,7 +29,10 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             var result = mapper.Map<CartProductDto>(product);
 
             // Assert
-            new ProductDtoMappedValidator(product).ValidateAndThrow(result);
+            result.Description.Should().Be(product.Description);
+            result.ID.Should().Be(product.ID);
+            result.Name.Should().Be(product.Name);
+            result.Price.Should().Be(product.Price);
         }
 
         [TestMethod]
@@ -42,7 +46,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             var result = mapper.Map<CartProductDto>(null);
 
             // Assert
-            Assert.IsNull(result);
+            result.Should().BeNull();
         }
     }
 }

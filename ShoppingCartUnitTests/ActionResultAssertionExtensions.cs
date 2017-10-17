@@ -23,7 +23,7 @@ namespace ShoppingCart.UnitTests
             string resultMessageBody)
             where TExpectedResult : ObjectResult
         {
-            result.Subject.Value.Should().BeAssignableTo<ResultMessageDto>().Subject.Message.Should().Be(resultMessageBody);
+            result.Which.Value.Should().BeAssignableTo<ResultMessageDto>().Subject.Message.Should().Be(resultMessageBody);
             return result;
         }
     }

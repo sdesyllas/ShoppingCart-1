@@ -105,7 +105,7 @@ namespace ShoppingCart.UnitTests.Controllers
 
             // Assert
             response.AssertResponseType<OkObjectResult>(200)
-                .Subject.Value.Should().BeAssignableTo<CartDto>()
+                .Which.Value.Should().BeAssignableTo<CartDto>()
                 .Which.Name.Should().Be(cart.Result.Name);
         }
     }
