@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using FluentValidation;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Controllers;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
-using ShoppingCart.UnitTests.Controllers.Validators;
 using SimpleFixture;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -45,7 +45,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Get("cart1");
 
             // Assert
-            new NotFoundResultValidator("Cart cart1 not found").ValidateAndThrow(response);
+            response.AssertResponseType<NotFoundObjectResult>(404)
+               .AssertMessage("Cart cart1 not found");
         }
 
         [TestMethod]
@@ -69,7 +70,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Get("cart1");
 
             // Assert
-            new InternalServerErrorValidator("Inconsistent database state").ValidateAndThrow(response);
+            response.AssertResponseType<ObjectResult>(500)
+                .AssertMessage("Inconsistent database state");
         }
 
         [TestMethod]
@@ -102,7 +104,9 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Get(cart.Result.Name);
 
             // Assert
-            new CartResultValidator(cart.Result.Name).ValidateAndThrow(response);
+            response.AssertResponseType<OkObjectResult>(200)
+                .Subject.Value.Should().BeAssignableTo<CartDto>()
+                .Which.Name.Should().Be(cart.Result.Name);
         }
     }
 }

@@ -1,13 +1,12 @@
-﻿using FluentValidation;
+﻿using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Controllers;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
-using ShoppingCart.UnitTests.Controllers.Validators;
 using SimpleFixture;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ShoppingCart.UnitTests.Controllers
@@ -41,7 +40,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Put("cart1", null);
 
             // Assert
-            new BadRequestResultValidator("Empty body").ValidateAndThrow(response);
+            response.AssertResponseType<BadRequestObjectResult>(400)
+                .AssertMessage("Empty body");
         }
 
         [TestMethod]
@@ -58,7 +58,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Put("cart1", body);
 
             // Assert
-            new NotFoundResultValidator("Cart cart1 not found").ValidateAndThrow(response);
+            response.AssertResponseType<NotFoundObjectResult>(404)
+                .AssertMessage("Cart cart1 not found");
         }
 
         [TestMethod]
@@ -81,7 +82,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Put(cart.Result.Name, body);
 
             // Assert
-            new NotFoundResultValidator($"Product with id { body.ID } not found").ValidateAndThrow(response);
+            response.AssertResponseType<NotFoundObjectResult>(404)
+                .AssertMessage($"Product with id { body.ID } not found");
         }
 
         [TestMethod]
@@ -108,7 +110,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Put(cart.Result.Name, body);
 
             // Assert
-            new BadRequestResultValidator("Not enough quantity").ValidateAndThrow(response);
+            response.AssertResponseType<BadRequestObjectResult>(400)
+                .AssertMessage("Not enough quantity");
         }
         [TestMethod]
         public async Task Should_Return400_When_QuantityLowerThan0()
@@ -124,7 +127,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Put(string.Empty, body);
 
             // Assert
-            new BadRequestResultValidator("Invalid quantity").ValidateAndThrow(response);
+            response.AssertResponseType<BadRequestObjectResult>(400)
+                .AssertMessage("Invalid quantity");
         }
 
         [TestMethod]
@@ -151,9 +155,10 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.Put(cart.Result.Name, body);
 
             // Assert
-            new OkResultValidator("Product added").ValidateAndThrow(response);
-            Assert.IsTrue(cart.Result.Items.Any(x => x.ID == body.ID && x.Quantity == body.Quantity));
-            NUnit.Framework.Assert.That(cart.Result.Items, NUnit.Framework.Has.Member(body).Using(new AddCartItemToCartItemModelComparer()));
+            var cartResponse = response.AssertResponseType<OkObjectResult>(200)
+                .AssertMessage("Product added");
+
+            cart.Result.Items.Should().Contain(x => x.ID == body.ID && x.Quantity == body.Quantity);
         }
 
         //TODO test quantity aggeregation
