@@ -18,7 +18,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
         }
 
         [TestMethod]
-        public void TestProductMapperProviderMapperMapsValue()
+        public void Should_ReturnValidDto()
         {
             // Arrange
             var product = fixture.Generate<Product>();
@@ -32,7 +32,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
         }
 
         [TestMethod]
-        public void TestProductMapperProviderMapperMapsNullValue()
+        public void Should_ReturnNull_When_NullObjectProvided()
         {
             // Arrange
             var product = fixture.Generate<Product>();

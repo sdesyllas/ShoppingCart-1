@@ -22,7 +22,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
         }
 
         [TestMethod]
-        public void ProviderMapperMapsValues()
+        public void Should_ProvideValidMapper()
         {
             // Arrange
             var cart = fixture.Generate<Cart>();

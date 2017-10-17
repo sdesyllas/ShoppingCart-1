@@ -3,40 +3,39 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Controllers;
 using ShoppingCart.Shared;
+using ShoppingCart.Shared.Dto;
+using ShoppingCart.Shared.Model;
 using ShoppingCart.UnitTests.Controllers.Validators;
 using SimpleFixture;
-using System.Threading.Tasks;
-using ShoppingCart.Shared.Dto;
 using System.Linq;
-using ShoppingCart.Shared.Model;
-using AutoMapper;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ShoppingCart.UnitTests.Controllers
 {
     [TestClass]
     public class ShoppingBasketControllerPutTests
     {
-
         private Fixture fixture;
+        private Mock<IRepository<Cart>> cartReposioryMock;
+        private Mock<IQueryableByIdRepository<Product>> productReposioryMock;
+        private Mock<IMapperProvider<Cart, CartDto>> mapperProviderMock;
 
         [TestInitialize]
         public void Initialize()
         {
             fixture = new Fixture();
+            cartReposioryMock = new Mock<IRepository<Cart>>();
+            productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
+            mapperProviderMock = new Mock<IMapperProvider<Cart, CartDto>>();
         }
 
         [TestMethod]
-        public async Task TestPutForEmptyRequestBody()
+        public async Task Should_Return400_When_NoBody()
         {
             // Arrange
-            var cartReposioryMock = new Mock<IRepository<Cart>>();
-            var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
-            var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
-
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProvider.Object);
+                mapperProviderMock.Object);
 
             // Act
             var response = await controller.Put("cart1", null);
@@ -46,18 +45,14 @@ namespace ShoppingCart.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task TestPutForNotExistingBasket()
+        public async Task Should_Return404_When_NoBasketFound()
         {
             // Arrange
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = fixture.Generate<int>(constraints: new { min = 1 }) });
 
-            var cartReposioryMock = new Mock<IRepository<Cart>>();
-            var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
-            var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
-
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProvider.Object);
+                mapperProviderMock.Object);
 
             // Act
             var response = await controller.Put("cart1", body);
@@ -67,22 +62,20 @@ namespace ShoppingCart.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task TestPutForNotExistingProduct()
+        public async Task Shoudl_Return404_When_ProductNotFound()
         {
             // Arrange
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = fixture.Generate<int>(constraints: new { min = 1 }) });
             var cart = Task.FromResult(fixture.Generate<Cart>());
 
-            var cartReposioryMock = new Mock<IRepository<Cart>>();
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             cartReposioryMock
                 .Setup(m => m.GetByNameAsync(cart.Result.Name))
                 .Returns(cart);
-            var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProvider.Object);
+                mapperProviderMock.Object);
 
             // Act
             var response = await controller.Put(cart.Result.Name, body);
@@ -92,28 +85,24 @@ namespace ShoppingCart.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task TestPutForNotEnoughQuantitiy()
+        public async Task Should_Return400_When_QuanitiyIsLargerThanStock()
         {
             // Arrange
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = 10 });
             var cart = Task.FromResult(fixture.Generate<Cart>());
             var product = Task.FromResult(fixture.Generate<Product>(constraints: new { Stock = 5 }));
 
-            var cartReposioryMock = new Mock<IRepository<Cart>>();
             cartReposioryMock
                 .Setup(m => m.GetByNameAsync(cart.Result.Name))
                 .Returns(cart);
 
-            var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             productReposioryMock
                 .Setup(m => m.GetByIdAsync(body.ID))
                 .Returns(product);
 
-            var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
-
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProvider.Object);
+                mapperProviderMock.Object);
 
             // Act
             var response = await controller.Put(cart.Result.Name, body);
@@ -122,18 +111,14 @@ namespace ShoppingCart.UnitTests.Controllers
             new BadRequestResultValidator("Not enough quantity").ValidateAndThrow(response);
         }
         [TestMethod]
-        public async Task TestPutForNegativeQuantity()
+        public async Task Should_Return400_When_QuantityLowerThan0()
         {
             // Arrange
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = -1 });
 
-            var cartReposioryMock = new Mock<IRepository<Cart>>();
-            var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
-            var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
-
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProvider.Object);
+                mapperProviderMock.Object);
 
             // Act
             var response = await controller.Put(string.Empty, body);
@@ -143,28 +128,24 @@ namespace ShoppingCart.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task TestPutForSuccess()
+        public async Task Should_Return200_When_CorrectDataProvided()
         {
             // Arrange
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = 10 });
             var cart = Task.FromResult(fixture.Generate<Cart>());
             var product = Task.FromResult(fixture.Generate<Product>(constraints: new { Stock = 10 }));
 
-            var cartReposioryMock = new Mock<IRepository<Cart>>();
             cartReposioryMock
                 .Setup(m => m.GetByNameAsync(cart.Result.Name))
                 .Returns(cart);
 
-            var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
             productReposioryMock
                 .Setup(m => m.GetByIdAsync(body.ID))
                 .Returns(product);
 
-            var mapperProvider = new Mock<IMapperProvider<Cart, CartDto>>();
-
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
                 productReposioryMock.Object,
-                mapperProvider.Object);
+                mapperProviderMock.Object);
 
             // Act
             var response = await controller.Put(cart.Result.Name, body);

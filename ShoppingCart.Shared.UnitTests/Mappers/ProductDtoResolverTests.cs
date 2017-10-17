@@ -21,7 +21,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
         }
 
         [TestMethod]
-        public void ProductDtoResolverResolvesDto()
+        public void Should_ResolveValidDto()
         {
             // Arrange
             var cartItem = fixture.Generate<CartItem>();
