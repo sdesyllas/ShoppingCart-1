@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="App_data\products.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -21,11 +27,10 @@
     <ProjectReference Include="..\ShoppingCartRepository\ShoppingCart.Repository.csproj" />
     <ProjectReference Include="..\ShoppingCartShared\ShoppingCart.Shared.csproj" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <Content Update="wwwroot\products.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
+
 
 </Project>
