@@ -10,6 +10,7 @@ using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Mappers;
 using ShoppingCart.Shared.Model;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace ShoppingCart
 {
@@ -37,6 +38,11 @@ namespace ShoppingCart
             services.AddTransient(typeof(IValueResolver<CartItem, CartItemDto, CartProductDto>), typeof(ProductDtoResolver));
             services.AddTransient(typeof(IMapperProvider<Product, CartProductDto>), typeof(ProductMapperProvider));
             services.AddTransient(typeof(IMapperProvider<Cart, CartDto>), typeof(CartMapperProvider));
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "ShoppingCart", Version = "0.0.0.1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +55,12 @@ namespace ShoppingCart
             
             app.UseStaticFiles();
             app.UseMvc();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "ShoppingCart 0.0.0.1");
+            });
 
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();

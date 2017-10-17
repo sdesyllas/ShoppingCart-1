@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Net;
 
 namespace ShoppingCart.Controllers
 {
@@ -31,6 +33,9 @@ namespace ShoppingCart.Controllers
         }
 
         [HttpGet("{cartName}")]
+        [SwaggerResponse(200, typeof(CartDto), "Cart exists")]
+        [SwaggerResponse(404, typeof(ResultMessageDto), "Cart not found")]
+        [SwaggerResponse(500, typeof(ResultMessageDto), "Cart contains item with invalid product")]
         public async Task<ActionResult> Get(string cartName)
         {
             _logger.LogDebug($"Get called with parameter: {cartName}");
@@ -52,6 +57,9 @@ namespace ShoppingCart.Controllers
         }
 
         [HttpPut("{cartName}")]
+        [SwaggerResponse(200, typeof(ResultMessageDto), "Product added")]
+        [SwaggerResponse(400, typeof(ResultMessageDto), "Empty body / Invalid product quantity / Cart has beed checked out / Not enough stock")]
+        [SwaggerResponse(404, typeof(ResultMessageDto), "Cart not found / Product not found")]
         public async Task<ActionResult> Put(string cartName, [FromBody] AddCartItemDto item)
         {
             _logger.LogDebug($"Put called with parameter: {cartName}");
@@ -85,7 +93,7 @@ namespace ShoppingCart.Controllers
 
             if (product.Stock < item.Quantity)
             {
-                return BadRequest(new ResultMessageDto("Not enough quantity"));
+                return BadRequest(new ResultMessageDto("Not enough stock"));
             }
 
             CartItem model = new CartItem()
@@ -99,6 +107,9 @@ namespace ShoppingCart.Controllers
         }
 
         [HttpGet("{cartName}/Checkout")]
+        [SwaggerResponse(200, typeof(ResultMessageDto), "Cart checked out")]
+        [SwaggerResponse(400, typeof(ResultMessageDto), "Empty body / Invalid product quantity / Cart has beed checked out / Not enough stock")]
+        [SwaggerResponse(404, typeof(ResultMessageDto), "Cart not found / Cart item product not found")]
         public async Task<ActionResult> Checkout(string cartName)
         {
             _logger.LogDebug($"Checkout called with parameter: {cartName}");
