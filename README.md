@@ -16,4 +16,6 @@ Tools
 - SimpleFixture 
 
 Further development
-- ShoppingBasketController validations improvment - segregation + validation tool
+- ShoppingBasketController validations improvement - segregation + validation tools
+- Data persistance
+- Thread safe stock operations
