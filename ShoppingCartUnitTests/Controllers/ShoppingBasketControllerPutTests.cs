@@ -48,6 +48,8 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return404_When_NoBasketFound()
         {
             // Arrange
+            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = fixture.Generate<int>(constraints: new { min = 1 }) });
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
@@ -66,6 +68,8 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Shoudl_Return404_When_ProductNotFound()
         {
             // Arrange
+            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = fixture.Generate<int>(constraints: new { min = 1 }) });
             var cart = Task.FromResult(fixture.Generate<Cart>());
 
@@ -90,6 +94,8 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return400_When_QuanitiyIsLargerThanStock()
         {
             // Arrange
+            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = 10 });
             var cart = Task.FromResult(fixture.Generate<Cart>());
             var product = Task.FromResult(fixture.Generate<Product>(constraints: new { Stock = 5 }));
@@ -113,10 +119,13 @@ namespace ShoppingCart.UnitTests.Controllers
             response.AssertResponseType<BadRequestObjectResult>(400)
                 .AssertMessage("Not enough quantity");
         }
+
         [TestMethod]
         public async Task Should_Return400_When_QuantityLowerThan0()
         {
             // Arrange
+            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = -1 });
 
             var controller = new ShoppingBasketController(cartReposioryMock.Object,
@@ -132,9 +141,35 @@ namespace ShoppingCart.UnitTests.Controllers
         }
 
         [TestMethod]
+        public async Task Should_Return400_When_BasketIsCheckedOut()
+        {
+            // Arrange
+            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, true);
+
+            var body = fixture.Generate<AddCartItemDto>();
+            var cart = Task.FromResult(fixture.Generate<Cart>());
+
+            cartReposioryMock.Setup(x => x.GetByNameAsync(cart.Result.Name))
+                .Returns(cart);
+            
+            var controller = new ShoppingBasketController(cartReposioryMock.Object,
+                productReposioryMock.Object,
+                mapperProviderMock.Object);
+
+            // Act
+            var response = await controller.Put(cart.Result.Name, body);
+
+            // Assert
+            response.AssertResponseType<BadRequestObjectResult>(400)
+                .AssertMessage("Cart is checked out");
+        }
+
+        [TestMethod]
         public async Task Should_Return200_When_CorrectDataProvided()
         {
             // Arrange
+            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+
             var body = fixture.Generate<AddCartItemDto>(constraints: new { Quantity = 10 });
             var cart = Task.FromResult(fixture.Generate<Cart>());
             var product = Task.FromResult(fixture.Generate<Product>(constraints: new { Stock = 10 }));
@@ -160,8 +195,5 @@ namespace ShoppingCart.UnitTests.Controllers
 
             cart.Result.Items.Should().Contain(x => x.ID == body.ID && x.Quantity == body.Quantity);
         }
-
-        //TODO test quantity aggeregation
-        //TODO Put to closed basket
     }
 }

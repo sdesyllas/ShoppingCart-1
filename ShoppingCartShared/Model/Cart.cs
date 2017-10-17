@@ -8,6 +8,8 @@ namespace ShoppingCart.Shared.Model
 
         public List<CartItem> Items { get; set; }
 
+        public bool IsCheckedOut { get; set; }
+
         public Cart(string name, List<CartItem> items)
         {
             Name = name;

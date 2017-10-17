@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace ShoppingCart.Controllers
 {
-    //TODO: conent-type
     [Route("api/[controller]")]
     public class ShoppingBasketController : Controller
     {
@@ -64,6 +64,11 @@ namespace ShoppingCart.Controllers
                 return NotFound(new ResultMessageDto($"Cart {cartName} not found"));
             }
 
+            if (cart.IsCheckedOut)
+            {
+                return BadRequest(new ResultMessageDto("Cart is checked out"));
+            }
+
             var product = await _productsRepository.GetByIdAsync(item.ID);
             if (product == null)
             {
@@ -83,6 +88,56 @@ namespace ShoppingCart.Controllers
             cart.Items.Add(model);
 
             return Ok(new ResultMessageDto("Product added"));
+        }
+
+        [HttpGet("{cartName}/Checkout")]
+        public async Task<ActionResult> Checkout(string cartName)
+        {
+            var cart = await _cartsRepository.GetByNameAsync(cartName);
+            if (cart == null)
+            {
+                return NotFound(new ResultMessageDto("Cart not found"));
+            }
+
+            if (cart.IsCheckedOut)
+            {
+                return BadRequest(new ResultMessageDto("Cart already checked out"));
+            }
+
+            var products = await GetProductsFromCartItems(cart);
+            if (products.Any(x => x == null))
+            {
+                return NotFound(new ResultMessageDto("Cart product not found"));
+            }
+
+            var groupedItems = cart.Items
+                .GroupBy(x => x.ID)
+                .Select(x => new
+                {
+                    Id = x.Key,
+                    CartSum = x.Sum(y => y.Quantity),
+                    Product = products.First(prod => prod.ID == x.Key)
+                })
+                .ToList();
+
+            if (groupedItems.Any(x => x.Product.Stock < x.CartSum))
+            {
+                return BadRequest(new ResultMessageDto("Items out of stock"));
+            }
+
+            groupedItems.ForEach(x => x.Product.Stock -= x.CartSum);
+            cart.IsCheckedOut = true;
+
+            return Ok(new ResultMessageDto("Cart checked out"));
+        }
+
+        private async Task<IEnumerable<Product>> GetProductsFromCartItems(Cart cart)
+        {
+            var productTasks = cart.Items
+                .Select(x => x.ID)
+                .Distinct()
+                .Select(_productsRepository.GetByIdAsync);
+            return await Task.WhenAll(productTasks);
         }
     }
 }
