@@ -1,12 +1,8 @@
-﻿using AutoMapper;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using ShoppingCart.Controllers;
 using ShoppingCart.Shared;
-using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 using SimpleFixture;
 using System.Collections.Generic;
@@ -15,50 +11,28 @@ using System.Threading.Tasks;
 namespace ShoppingCart.UnitTests.Controllers
 {
     [TestClass]
-    public class ShoppingBasketControllerCheckoutTests
+    public class ShoppingBasketControllerCheckoutTests : AbstractShoppingBasketContollerTest
     {
-
-        private Fixture fixture;
-        private Mock<IRepository<Cart>> cartReposioryMock;
-        private Mock<IQueryableByIdRepository<Product>> productReposioryMock;
-        private Mock<IMapperProvider<Cart, CartDto>> mapperProviderMock;
-        private Mock<ILogger<ShoppingBasketController>> loggerMock;
-        private Mock<IMapper> mapperMock;
-
-        [TestInitialize]
-        public void Initialize()
-        {
-            fixture = new Fixture();
-            cartReposioryMock = new Mock<IRepository<Cart>>();
-            productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
-            mapperProviderMock = new Mock<IMapperProvider<Cart, CartDto>>();
-            loggerMock = new Mock<ILogger<ShoppingBasketController>>();
-            mapperMock = new Mock<IMapper>();
-        }
-
         [TestMethod]
         public async Task Should_Return400_When_ItemOutOfStock()
         {
             // Arrange
-            fixture.Customize<Product>().Set(x => x.Stock, 10);
-            fixture.Customize<CartItem>().Set(x => x.Quantity, 11);
-            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+            Fixture.Customize<Product>().Set(x => x.Stock, 10);
+            Fixture.Customize<CartItem>().Set(x => x.Quantity, 11);
+            Fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
 
-            var cart = fixture.Generate<Cart>();
+            var cart = Fixture.Generate<Cart>();
 
-            cartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
+            CartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
                 .Returns(Task.FromResult(cart));
 
-            productReposioryMock.Setup(x => x.GetByIdAsync(It.IsAny<long>()))
-                .Returns<long>(x => Task.FromResult(fixture.Generate<Product>(constraints: new { Identifier = x })));
+            ProductReposioryMock.Setup(x => x.GetByIdAsync(It.IsAny<long>()))
+                .Returns<long>(x => Task.FromResult(Fixture.Generate<Product>(constraints: new { Identifier = x })));
 
-            var controller = new ShoppingBasketController(cartReposioryMock.Object,
-                productReposioryMock.Object,
-                mapperProviderMock.Object,
-                loggerMock.Object);
+            var controller = InitController();
 
             // Act
-            var response = await controller.Checkout(cart.Name);
+            var response = await controller.CheckoutAsync(cart.Name);
 
             // Assert
             response.AssertResponseType<BadRequestObjectResult>(400).AssertMessage("Items out of stock");
@@ -68,30 +42,27 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return400_When_ItemAggeregatedOutOfStock()
         {
             // Arrange
-            fixture.Customize<Product>().Set(x => x.Stock, 10);
-            fixture.Customize<CartItem>().Set(x => x.Quantity, 6).Set(x => x.ProductId, 2);
-            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
-            fixture.Customize<Cart>().Set(x => x.Items, new List<CartItem>()
+            Fixture.Customize<Product>().Set(x => x.Stock, 10);
+            Fixture.Customize<CartItem>().Set(x => x.Quantity, 6).Set(x => x.ProductId, 2);
+            Fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+            Fixture.Customize<Cart>().Set(x => x.Items, new List<CartItem>()
             {
-                fixture.Generate<CartItem>(),
-                fixture.Generate<CartItem>()
+                Fixture.Generate<CartItem>(),
+                Fixture.Generate<CartItem>()
             });
 
-            var cart = fixture.Generate<Cart>();
+            var cart = Fixture.Generate<Cart>();
 
-            cartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
+            CartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
                 .ReturnsAsync(cart);
 
-            productReposioryMock.Setup(x => x.GetByIdAsync(It.IsAny<long>()))
-                .Returns<long>(x => Task.FromResult(fixture.Generate<Product>(constraints: new { Identifier = x })));
+            ProductReposioryMock.Setup(x => x.GetByIdAsync(It.IsAny<long>()))
+                .Returns<long>(x => Task.FromResult(Fixture.Generate<Product>(constraints: new { Identifier = x })));
 
-            var controller = new ShoppingBasketController(cartReposioryMock.Object,
-                productReposioryMock.Object,
-                mapperProviderMock.Object,
-                loggerMock.Object);
+            var controller = InitController();
 
             // Act
-            var response = await controller.Checkout(cart.Name);
+            var response = await controller.CheckoutAsync(cart.Name);
 
             // Assert
             response.AssertResponseType<BadRequestObjectResult>(400).AssertMessage("Items out of stock");
@@ -101,19 +72,16 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return400_When_BasketAlreadyCheckedOut()
         {
             // Arrange
-            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, true);
+            Fixture.Customize<Cart>().Set(x => x.IsCheckedOut, true);
 
-            var cart = fixture.Generate<Cart>();
+            var cart = Fixture.Generate<Cart>();
 
-            cartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
+            CartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
                 .ReturnsAsync(cart);
 
-            var controller = new ShoppingBasketController(cartReposioryMock.Object,
-                productReposioryMock.Object,
-                mapperProviderMock.Object,
-                loggerMock.Object);
+            var controller = InitController();
 
-            var response = await controller.Checkout(cart.Name);
+            var response = await controller.CheckoutAsync(cart.Name);
 
             response.AssertResponseType<BadRequestObjectResult>(400).AssertMessage("Cart is checked out");
         }
@@ -122,21 +90,18 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return404_When_ProductInBasketDoesNotExistInRepository()
         {
             // Arrange
-            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
-            var cart = Task.FromResult(fixture.Generate<Cart>());
+            Fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+            var cart = Task.FromResult(Fixture.Generate<Cart>());
 
             var productReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
-            cartReposioryMock
+            CartReposioryMock
                 .Setup(m => m.GetByNameAsync(cart.Result.Name))
                 .Returns(cart);
 
-            var controller = new ShoppingBasketController(cartReposioryMock.Object,
-                productReposioryMock.Object,
-                mapperProviderMock.Object,
-                loggerMock.Object);
+            var controller = InitController();
 
             // Act
-            var response = await controller.Checkout(cart.Result.Name);
+            var response = await controller.CheckoutAsync(cart.Result.Name);
 
             // Assert
             response.AssertResponseType<NotFoundObjectResult>(404)
@@ -147,14 +112,10 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return404_When_BasketDoesNotExist()
         {
             // Arrange
-            var controller = new ShoppingBasketController(
-                cartReposioryMock.Object,
-                productReposioryMock.Object,
-                mapperProviderMock.Object,
-                loggerMock.Object);
+            var controller = InitController();
 
             // Act
-            var response = await controller.Checkout("cart1");
+            var response = await controller.CheckoutAsync("cart1");
 
             // Assert
             response.AssertResponseType<NotFoundObjectResult>(404).AssertMessage("Cart not found");
@@ -164,32 +125,29 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return200AndReduceStocks_When_CheckedOut()
         {
             // Arrange
-            fixture.Customize<Product>().Set(x => x.Stock, 10).Set(x => x.Id, 2);
-            var product = fixture.Generate<Product>();
+            Fixture.Customize<Product>().Set(x => x.Stock, 10).Set(x => x.Id, 2);
+            var product = Fixture.Generate<Product>();
 
-            fixture.Customize<CartItem>().Set(x => x.Quantity, 4).Set(x => x.ProductId, product.Id);
-            fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
-            fixture.Customize<Cart>().Set(x => x.Items, new List<CartItem>()
+            Fixture.Customize<CartItem>().Set(x => x.Quantity, 4).Set(x => x.ProductId, product.Id);
+            Fixture.Customize<Cart>().Set(x => x.IsCheckedOut, false);
+            Fixture.Customize<Cart>().Set(x => x.Items, new List<CartItem>()
             {
-                fixture.Generate<CartItem>(),
-                fixture.Generate<CartItem>()
+                Fixture.Generate<CartItem>(),
+                Fixture.Generate<CartItem>()
             });
 
-            var cart = fixture.Generate<Cart>();
+            var cart = Fixture.Generate<Cart>();
             
 
-            cartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
+            CartReposioryMock.Setup(x => x.GetByNameAsync(cart.Name))
                 .ReturnsAsync(cart);
-            productReposioryMock.Setup(x => x.GetByIdAsync(product.Id))
+            ProductReposioryMock.Setup(x => x.GetByIdAsync(product.Id))
                 .ReturnsAsync(product);
 
-            var controller = new ShoppingBasketController(cartReposioryMock.Object,
-                productReposioryMock.Object,
-                mapperProviderMock.Object,
-                loggerMock.Object);
+            var controller = InitController();
 
             // Act
-            var response = await controller.Checkout(cart.Name);
+            var response = await controller.CheckoutAsync(cart.Name);
 
             // Assert
             response.AssertResponseType<OkObjectResult>(200).AssertMessage("Cart checked out");

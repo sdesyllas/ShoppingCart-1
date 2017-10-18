@@ -24,13 +24,14 @@ namespace ShoppingCart.Controllers
         public ShoppingBasketController(IRepository<Cart> cartsRepository,
             IQueryableByIdRepository<Product> productsRepository,
             IMapperProvider<Cart, CartDto> cartMapperProvider,
+            IMapperProvider<AddCartItemDto, CartItem> cartItemMapper,
             ILogger<ShoppingBasketController> logger)
         {
             _cartsRepository = cartsRepository;
             _productsRepository = productsRepository;
             _cartMapper = cartMapperProvider.Provide();
+            _cartItemMapper = cartItemMapper.Provide();
             _logger = logger;
-            _cartItemMapper = new MapperConfiguration(cfg => cfg.CreateMap<AddCartItemDto, CartItem>()).CreateMapper();
         }
 
         [HttpGet("{cartName}")]
@@ -66,7 +67,7 @@ namespace ShoppingCart.Controllers
         [SwaggerResponse(200, typeof(ResultMessageDto), "Product added")]
         [SwaggerResponse(400, typeof(ResultMessageDto), "Empty body / Invalid product quantity / Cart has beed checked out / Not enough stock")]
         [SwaggerResponse(404, typeof(ResultMessageDto), "Cart not found / Product not found")]
-        public async Task<ActionResult> Put(string cartName, [FromBody] AddCartItemDto item)
+        public async Task<ActionResult> PutAsync(string cartName, [FromBody] AddCartItemDto item)
         {
             _logger.LogDebug($"Put called with parameter: {cartName}");
 
@@ -110,7 +111,7 @@ namespace ShoppingCart.Controllers
             return null;
         }
 
-        public ActionResult ValidateForAddItem(AddCartItemDto item)
+        private ActionResult ValidateForAddItem(AddCartItemDto item)
         {
             if (item == null)
             {
@@ -125,7 +126,7 @@ namespace ShoppingCart.Controllers
             return null;
         }
 
-        public async Task<ActionResult> ValidateStockAsync(AddCartItemDto item)
+        private async Task<ActionResult> ValidateStockAsync(AddCartItemDto item)
         {
             var product = await _productsRepository.GetByIdAsync(item.ProductId);
             if (product == null)
@@ -145,7 +146,7 @@ namespace ShoppingCart.Controllers
         [SwaggerResponse(200, typeof(ResultMessageDto), "Cart checked out")]
         [SwaggerResponse(400, typeof(ResultMessageDto), "Empty body / Invalid product quantity / Cart has beed checked out / Not enough stock")]
         [SwaggerResponse(404, typeof(ResultMessageDto), "Cart not found / Cart item product not found")]
-        public async Task<ActionResult> Checkout(string cartName)
+        public async Task<ActionResult> CheckoutAsync(string cartName)
         {
             _logger.LogDebug($"Checkout called with parameter: {cartName}");
 
@@ -170,9 +171,11 @@ namespace ShoppingCart.Controllers
 
         private void Checkout(Cart cart, IEnumerable<Product> products)
         {
-            cart.Items
-                .ToList()
-                .ForEach(x => products.First(p => p.Id == x.ProductId).Stock -= x.Quantity);
+            foreach (var item in cart.Items)
+            {
+                products.First(p => p.Id == item.ProductId).Stock -= item.Quantity;
+            }
+
             cart.IsCheckedOut = true;
         }
 

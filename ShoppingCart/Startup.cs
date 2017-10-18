@@ -38,6 +38,8 @@ namespace ShoppingCart
             services.AddTransient(typeof(IValueResolver<CartItem, CartItemDto, CartProductDto>), typeof(ProductDtoResolver));
             services.AddTransient(typeof(IMapperProvider<Product, CartProductDto>), typeof(ProductMapperProvider));
             services.AddTransient(typeof(IMapperProvider<Cart, CartDto>), typeof(CartMapperProvider));
+            services.AddTransient(typeof(IMapperProvider<AddCartItemDto, CartItem>), typeof(AddCartItemMapperProvider));
+            
 
             services.AddSwaggerGen(c =>
             {
