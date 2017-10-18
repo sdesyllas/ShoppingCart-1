@@ -7,9 +7,6 @@ using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ShoppingCart.Controllers
@@ -83,7 +80,7 @@ namespace ShoppingCart.Controllers
             }
             catch (ProdcutNotFoundException)
             {
-                _logger.LogDebug($"Product not found");
+                _logger.LogDebug($"Product not found on {cartName}");
                 return NotFound(new ResultMessageDto($"Product with id {item.ProductId} not found"));
             }
             catch (CartNotFoundException)
@@ -98,6 +95,7 @@ namespace ShoppingCart.Controllers
             }
             catch (NotEnoughStockException)
             {
+                _logger.LogDebug($"Cart {cartName} checked out");
                 return BadRequest(new ResultMessageDto("Not enough stock"));
             }
         }
@@ -124,58 +122,30 @@ namespace ShoppingCart.Controllers
         public async Task<ActionResult> CheckoutAsync(string cartName)
         {
             _logger.LogDebug($"Checkout called with parameter: {cartName}");
-
-            var cart = await _cartsRepository.GetByNameAsync(cartName);
-            //var cartValidationResult = ValidateCart(cart);
-            //if (cartValidationResult != null)
-            //{
-            //    return cartValidationResult;
-            //}
-
-            var products = await GetProductsFromCartItems(cart.Items);
-            var cartStockValidationResult = ValidateCartStock(cart, products);
-            if (cartStockValidationResult != null)
+            try
             {
-                return cartStockValidationResult;
+                await _cartsRepository.CheckoutAsync(cartName, _productsRepository.GetByIdAsync);
+                return Ok(new ResultMessageDto("Cart checked out"));
             }
-
-            await _cartsRepository.CheckoutAsync(cartName, _productsRepository.GetByIdAsync);
-
-            return Ok(new ResultMessageDto("Cart checked out"));
-        }
-
-        private ActionResult ValidateCartStock(Cart cart, IEnumerable<Product> products)
-        {
-            if (products.Any(x => x == null))
+            catch (CartNotFoundException)
             {
-                return NotFound(new ResultMessageDto("Cart product not found"));
+                _logger.LogDebug($"Cart {cartName} not found");
+                return NotFound(new ResultMessageDto("Cart not found"));
             }
-
-            var groupedItems = cart.Items
-                .GroupBy(x => x.ProductId)
-                .Select(x => new
-                {
-                    Id = x.Key,
-                    CartSum = x.Sum(y => y.Quantity),
-                    Product = products.First(prod => prod.Id == x.Key)
-                })
-                .ToList();
-
-            if (groupedItems.Any(x => x.Product.Stock < x.CartSum))
+            catch (ProdcutNotFoundException)
+            {
+                _logger.LogDebug($"Product not found on {cartName}");
+                return NotFound(new ResultMessageDto($"Cart product not found"));
+            }
+            catch (CartCheckedOutException)
+            {
+                _logger.LogDebug($"Cart {cartName} checked out");
+                return BadRequest(new ResultMessageDto("Cart is checked out"));
+            }
+            catch (NotEnoughStockException)
             {
                 return BadRequest(new ResultMessageDto("Items out of stock"));
             }
-
-            return null;
-        }
-
-        private async Task<IEnumerable<Product>> GetProductsFromCartItems(IEnumerable<CartItem> items)
-        {
-            var productTasks = items
-                .Select(x => x.ProductId)
-                .Distinct()
-                .Select(_productsRepository.GetByIdAsync);
-            return await Task.WhenAll(productTasks);
         }
     }
 }

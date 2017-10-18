@@ -33,6 +33,8 @@ namespace ShoppingCart.Repository
         public async Task CheckoutAsync(string cartName, Func<long, Task<Product>> productProvider)
         {
             var cart = await GetByNameAsync(cartName);
+            await EnsureStock(cart, productProvider);
+
             foreach (var item in cart.Items)
             {
                 var product = await productProvider(item.ProductId);
@@ -40,6 +42,32 @@ namespace ShoppingCart.Repository
             }
 
             cart.IsCheckedOut = true;
+        }
+
+        public async Task EnsureStock(Cart cart, Func<long, Task<Product>> productProvider)
+        {
+            var productTasks = cart.Items
+                .GroupBy(x => x.ProductId)
+                .Select(async x => new
+                {
+                    Id = x.Key,
+                    CartSum = x.Sum(y => y.Quantity),
+                    Product = await productProvider(x.Key)
+                });
+            bool anyItemBelowStock = (await Task.WhenAll(productTasks)).Any(x => x.Product.Stock < x.CartSum);
+            if (anyItemBelowStock)
+            {
+                throw new NotEnoughStockException();
+            }
+        }
+
+        private async Task<IEnumerable<Product>> GetProductsFromCartItems(IEnumerable<CartItem> items, Func<long, Task<Product>> productProvider)
+        {
+            var productTasks = items
+                .Select(x => x.ProductId)
+                .Distinct()
+                .Select(productProvider);
+            return await Task.WhenAll(productTasks);
         }
 
         public async Task AddItemToCart(string cartName, Func<long, Task<Product>> productProvider, CartItem item)
