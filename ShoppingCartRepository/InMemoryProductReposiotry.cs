@@ -1,4 +1,5 @@
-﻿using ShoppingCart.Shared;
+﻿using ShoppingCart.Repository.Exceptions;
+using ShoppingCart.Shared;
 using ShoppingCart.Shared.Model;
 using System;
 using System.Collections.Generic;

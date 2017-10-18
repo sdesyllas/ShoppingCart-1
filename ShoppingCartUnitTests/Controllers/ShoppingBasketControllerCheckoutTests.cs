@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ShoppingCart.Repository;
+using ShoppingCart.Repository.Exceptions;
 using ShoppingCart.Shared.Model;
 using System;
 using System.Threading.Tasks;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ShoppingCart.Repository
+namespace ShoppingCart.Repository.Exceptions
 {
     public class ProdcutNotFoundException : Exception
     {
