@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using ShoppingCart.Repository;
 using ShoppingCart.Repository.Exceptions;
 using ShoppingCart.Shared.Model;
 using System;
@@ -26,7 +25,7 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.CheckoutAsync(string.Empty);
 
             // Assert
-            response.AssertResponseType<BadRequestObjectResult>(400).AssertMessage("Items out of stock");
+            response.AssertResponseType<BadRequestObjectResult>(400).AssertMessage("Not enough stock");
         }
 
         [TestMethod]

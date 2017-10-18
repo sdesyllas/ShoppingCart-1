@@ -49,8 +49,8 @@ namespace ShoppingCart.UnitTests.Controllers
             var response = await controller.GetAsync("cart1");
 
             // Assert
-            response.AssertResponseType<ObjectResult>(500)
-                .AssertMessage("Inconsistent database");
+            response.AssertResponseType<NotFoundObjectResult>(404)
+                .AssertMessage("Cart product not found");
         }
 
         [TestMethod]

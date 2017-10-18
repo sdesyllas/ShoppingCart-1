@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ShoppingCart.Repository;
 using ShoppingCart.Repository.Exceptions;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
 using System.Threading.Tasks;
 
 namespace ShoppingCart.Controllers
@@ -41,22 +41,28 @@ namespace ShoppingCart.Controllers
         public async Task<ActionResult> GetAsync(string cartName)
         {
             _logger.LogDebug($"Get called with parameter: {cartName}");
-            try
+            return await HandleExceptionsAsync(cartName, async () =>
             {
                 var cart = await _cartsRepository.GetByNameAsync(cartName);
                 var cartDto = _cartMapper.Map<CartDto>(cart);
                 return Ok(cartDto);
-            }
-            catch (CartNotFoundException)
-            {
-                _logger.LogDebug($"Cart {cartName} not found");
-                return NotFound(new ResultMessageDto("Cart not found"));
-            }
-            catch (ProdcutNotFoundException)
-            {
-                _logger.LogDebug($"Product on cart {cartName} does not exist in database");
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database"));
-            }
+            });
+            //try
+            //{
+            //    var cart = await _cartsRepository.GetByNameAsync(cartName);
+            //    var cartDto = _cartMapper.Map<CartDto>(cart);
+            //    return Ok(cartDto);
+            //}
+            //catch (CartNotFoundException)
+            //{
+            //    _logger.LogDebug($"Cart {cartName} not found");
+            //    return NotFound(new ResultMessageDto("Cart not found"));
+            //}
+            //catch (ProdcutNotFoundException)
+            //{
+            //    _logger.LogDebug($"Product on cart {cartName} does not exist in database");
+            //    return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database"));
+            //}
         }
 
         [HttpPut("{cartName}")]
@@ -74,31 +80,11 @@ namespace ShoppingCart.Controllers
             }
 
             var model = _cartItemMapper.Map<CartItem>(item);
-            try
+            return await HandleExceptionsAsync(cartName, async () =>
             {
                 await _cartsRepository.AddItemToCartAsync(cartName, _productsRepository.GetByIdAsync, model);
                 return Ok(new ResultMessageDto("Product added"));
-            }
-            catch (ProdcutNotFoundException)
-            {
-                _logger.LogDebug($"Product not found on {cartName}");
-                return NotFound(new ResultMessageDto($"Product with id {item.ProductId} not found"));
-            }
-            catch (CartNotFoundException)
-            {
-                _logger.LogDebug($"Cart {cartName} not found");
-                return NotFound(new ResultMessageDto("Cart not found"));
-            }
-            catch (CartCheckedOutException)
-            {
-                _logger.LogDebug($"Cart {cartName} checked out");
-                return BadRequest(new ResultMessageDto("Cart is checked out"));
-            }
-            catch (NotEnoughStockException)
-            {
-                _logger.LogDebug($"Cart {cartName} checked out");
-                return BadRequest(new ResultMessageDto("Not enough stock"));
-            }
+            });
         }
 
         private ActionResult ValidateForAddItem(AddCartItemDto item)
@@ -123,29 +109,41 @@ namespace ShoppingCart.Controllers
         public async Task<ActionResult> CheckoutAsync(string cartName)
         {
             _logger.LogDebug($"Checkout called with parameter: {cartName}");
-            try
+            return await HandleExceptionsAsync(cartName, async () =>
             {
                 await _cartsRepository.CheckoutAsync(cartName, _productsRepository.GetByIdAsync);
                 return Ok(new ResultMessageDto("Cart checked out"));
+            });
+        }
+
+        private async Task<ActionResult> HandleExceptionsAsync(string cartName, Func<Task<ActionResult>> task)
+        {
+            try
+            {
+                return await task.Invoke();
             }
+
             catch (CartNotFoundException)
             {
                 _logger.LogDebug($"Cart {cartName} not found");
                 return NotFound(new ResultMessageDto("Cart not found"));
             }
+
             catch (ProdcutNotFoundException)
             {
                 _logger.LogDebug($"Product not found on {cartName}");
                 return NotFound(new ResultMessageDto($"Cart product not found"));
             }
+
             catch (CartCheckedOutException)
             {
                 _logger.LogDebug($"Cart {cartName} checked out");
                 return BadRequest(new ResultMessageDto("Cart is checked out"));
             }
+
             catch (NotEnoughStockException)
             {
-                return BadRequest(new ResultMessageDto("Items out of stock"));
+                return BadRequest(new ResultMessageDto("Not enough stock"));
             }
         }
     }

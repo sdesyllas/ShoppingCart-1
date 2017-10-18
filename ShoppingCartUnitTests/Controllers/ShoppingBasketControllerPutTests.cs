@@ -3,7 +3,6 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using ShoppingCart.Repository;
 using ShoppingCart.Repository.Exceptions;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
@@ -66,7 +65,7 @@ namespace ShoppingCart.UnitTests.Controllers
 
             // Assert
             response.AssertResponseType<NotFoundObjectResult>(404)
-                .AssertMessage($"Product with id { body.ProductId } not found");
+                .AssertMessage("Cart product not found");
         }
 
         [TestMethod]
