@@ -42,6 +42,23 @@ namespace ShoppingCart.Repository
             cart.IsCheckedOut = true;
         }
 
+        public async Task AddItemToCart(string cartName, Func<long, Task<Product>> productProvider, CartItem item)
+        {
+            var cart = await GetByNameAsync(cartName);
+            if (cart.IsCheckedOut)
+            {
+                throw new CartCheckedOutException();
+            }
+
+            var product = await productProvider(item.ProductId);
+            if (product.Stock < item.Quantity)
+            {
+                throw new NotEnoughStockException();
+            }
+
+            cart.Items.Add(item);
+        }
+
         private async Task EnsureDataAsync()
         {
             if (_baskets == null)

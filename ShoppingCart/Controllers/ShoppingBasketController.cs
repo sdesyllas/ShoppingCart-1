@@ -56,7 +56,7 @@ namespace ShoppingCart.Controllers
             }
             catch (ProdcutNotFoundException)
             {
-                _logger.LogDebug($"Prodeuct not found on cart {cartName} not found");
+                _logger.LogDebug($"Product on cart {cartName} does not exist in database");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database"));
             }
         }
@@ -75,38 +75,31 @@ namespace ShoppingCart.Controllers
                 return addItemValidationResult;
             }
 
-            var cart = await _cartsRepository.GetByNameAsync(cartName);
-            var cartValidationResult = ValidateCart(cart);
-            if(cartValidationResult != null)
+            var model = _cartItemMapper.Map<CartItem>(item);
+            try
             {
-                return cartValidationResult;
+                await _cartsRepository.AddItemToCart(cartName, _productsRepository.GetByIdAsync, model);
+                return Ok(new ResultMessageDto("Product added"));
             }
-
-            var stockValidationResult = await ValidateStockAsync(item);
-            if(stockValidationResult != null)
+            catch (ProdcutNotFoundException)
             {
-                return stockValidationResult;
+                _logger.LogDebug($"Product not found");
+                return NotFound(new ResultMessageDto($"Product with id {item.ProductId} not found"));
             }
-
-            var model =_cartItemMapper.Map<CartItem>(item);
-            cart.Items.Add(model);
-
-            return Ok(new ResultMessageDto("Product added"));
-        }
-
-        private ActionResult ValidateCart(Cart cart)
-        {
-            if (cart == null)
+            catch (CartNotFoundException)
             {
-                return NotFound(new ResultMessageDto($"Cart not found"));
+                _logger.LogDebug($"Cart {cartName} not found");
+                return NotFound(new ResultMessageDto("Cart not found"));
             }
-
-            if (cart.IsCheckedOut)
+            catch (CartCheckedOutException)
             {
+                _logger.LogDebug($"Cart {cartName} checked out");
                 return BadRequest(new ResultMessageDto("Cart is checked out"));
             }
-
-            return null;
+            catch (NotEnoughStockException)
+            {
+                return BadRequest(new ResultMessageDto("Not enough stock"));
+            }
         }
 
         private ActionResult ValidateForAddItem(AddCartItemDto item)
@@ -124,22 +117,6 @@ namespace ShoppingCart.Controllers
             return null;
         }
 
-        private async Task<ActionResult> ValidateStockAsync(AddCartItemDto item)
-        {
-            var product = await _productsRepository.GetByIdAsync(item.ProductId);
-            if (product == null)
-            {
-                return NotFound(new ResultMessageDto($"Product with id {item.ProductId} not found"));
-            }
-
-            if (product.Stock < item.Quantity)
-            {
-                return BadRequest(new ResultMessageDto("Not enough stock"));
-            }
-
-            return null;
-        }
-
         [HttpGet("{cartName}/Checkout")]
         [SwaggerResponse(200, typeof(ResultMessageDto), "Cart checked out")]
         [SwaggerResponse(400, typeof(ResultMessageDto), "Empty body / Invalid product quantity / Cart has beed checked out / Not enough stock")]
@@ -149,11 +126,11 @@ namespace ShoppingCart.Controllers
             _logger.LogDebug($"Checkout called with parameter: {cartName}");
 
             var cart = await _cartsRepository.GetByNameAsync(cartName);
-            var cartValidationResult = ValidateCart(cart);
-            if (cartValidationResult != null)
-            {
-                return cartValidationResult;
-            }
+            //var cartValidationResult = ValidateCart(cart);
+            //if (cartValidationResult != null)
+            //{
+            //    return cartValidationResult;
+            //}
 
             var products = await GetProductsFromCartItems(cart.Items);
             var cartStockValidationResult = ValidateCartStock(cart, products);
