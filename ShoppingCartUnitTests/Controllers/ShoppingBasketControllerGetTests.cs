@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using ShoppingCart.Repository;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 using SimpleFixture;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ShoppingCart.UnitTests.Controllers
@@ -17,8 +17,8 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return404_When_BasketDoesNotExist()
         {
             // Arrange
-            MapperProviderMock.Setup(x => x.Provide())
-                .Returns(CartMapperMock.Object);
+            CartReposioryMock.Setup(x => x.GetByNameAsync(It.IsAny<string>()))
+                .ThrowsAsync(new CartNotFoundException());
             var controller = InitController();
 
             // Act
@@ -34,10 +34,10 @@ namespace ShoppingCart.UnitTests.Controllers
         {
             CartReposioryMock
                 .Setup(x => x.GetByNameAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(Fixture.Generate<Cart>()));
+                .ReturnsAsync(Fixture.Generate<Cart>());
 
             CartMapperMock.Setup(x => x.Map<CartDto>(It.IsAny<Cart>()))
-                .Returns(new CartDto() { Items = new List<CartItemDto>() { new CartItemDto() { Product = null } } });
+                .Throws(new ProdcutNotFoundException());
 
             MapperProviderMock.Setup(x => x.Provide())
                 .Returns(CartMapperMock.Object);
@@ -65,11 +65,10 @@ namespace ShoppingCart.UnitTests.Controllers
             foreach (var item in cart.Result.Items)
                 ProductReposioryMock
                     .Setup(m => m.GetByIdAsync(item.ProductId))
-                    .Returns(Task.FromResult(Fixture.Generate<Product>(constraints: new { Identifier = item.ProductId })));
+                    .ReturnsAsync(Fixture.Generate<Product>(constraints: new { Identifier = item.ProductId }));
             
             CartMapperMock.Setup(m => m.Map<CartDto>(cart.Result))
                 .Returns(new CartDto() { Name = cart.Result.Name } );
-
             
             MapperProviderMock.Setup(m => m.Provide())
                 .Returns(CartMapperMock.Object);

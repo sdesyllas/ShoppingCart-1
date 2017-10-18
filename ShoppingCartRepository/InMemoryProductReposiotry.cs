@@ -1,10 +1,11 @@
 ﻿using ShoppingCart.Shared;
 using ShoppingCart.Shared.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ShoppingCart
+namespace ShoppingCart.Repository
 {
     public class InMemoryProductReposiotry : IQueryableByIdRepository<Product>
     {
@@ -19,7 +20,15 @@ namespace ShoppingCart
         public async Task<Product> GetByIdAsync(long id)
         {
             await EnsureDataAsync();
-            return _products.FirstOrDefault(x => x.Id == id);
+            try
+            {
+                return _products.First(x => x.Id == id);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new ProdcutNotFoundException(e);
+            }
+            
         }
 
         public async Task<Product> GetByNameAsync(string name)

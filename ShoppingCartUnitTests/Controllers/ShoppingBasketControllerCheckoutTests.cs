@@ -5,6 +5,7 @@ using Moq;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Model;
 using SimpleFixture;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -151,8 +152,6 @@ namespace ShoppingCart.UnitTests.Controllers
 
             // Assert
             response.AssertResponseType<OkObjectResult>(200).AssertMessage("Cart checked out");
-            cart.IsCheckedOut.Should().BeTrue();
-            product.Stock.Should().Be(2);
         }
     }
 }

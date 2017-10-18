@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ShoppingCart.Repository;
 using ShoppingCart.Shared;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,13 +17,13 @@ namespace ShoppingCart.Controllers
     [Route("api/[controller]")]
     public class ShoppingBasketController : Controller
     {
-        private readonly IRepository<Cart> _cartsRepository;
+        private readonly ICartRepository _cartsRepository;
         private readonly IQueryableByIdRepository<Product> _productsRepository;
         private readonly IMapper _cartMapper;
         private readonly IMapper _cartItemMapper;
         private readonly ILogger _logger;
 
-        public ShoppingBasketController(IRepository<Cart> cartsRepository,
+        public ShoppingBasketController(ICartRepository cartsRepository,
             IQueryableByIdRepository<Product> productsRepository,
             IMapperProvider<Cart, CartDto> cartMapperProvider,
             IMapperProvider<AddCartItemDto, CartItem> cartItemMapper,
@@ -41,26 +43,22 @@ namespace ShoppingCart.Controllers
         public async Task<ActionResult> GetAsync(string cartName)
         {
             _logger.LogDebug($"Get called with parameter: {cartName}");
-
-            var cart = await _cartsRepository.GetByNameAsync(cartName);
-            var cartDto = _cartMapper.Map<CartDto>(cart);
-
-            return ValidateForGetCart(cart, cartDto) ?? Ok(cartDto);
-        }
-
-        private ActionResult ValidateForGetCart(Cart cart, CartDto cartDto)
-        {
-            if (cart == null)
+            try
             {
+                var cart = await _cartsRepository.GetByNameAsync(cartName);
+                var cartDto = _cartMapper.Map<CartDto>(cart);
+                return Ok(cartDto);
+            }
+            catch (CartNotFoundException)
+            {
+                _logger.LogDebug($"Cart {cartName} not found");
                 return NotFound(new ResultMessageDto("Cart not found"));
             }
-
-            if (cartDto.Items != null && cartDto.Items.Any(x => x.Product == null))
+            catch (ProdcutNotFoundException)
             {
+                _logger.LogDebug($"Prodeuct not found on cart {cartName} not found");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database"));
             }
-
-            return null;
         }
 
         [HttpPut("{cartName}")]
@@ -164,19 +162,9 @@ namespace ShoppingCart.Controllers
                 return cartStockValidationResult;
             }
 
-            Checkout(cart, products);
+            await _cartsRepository.CheckoutAsync(cartName, _productsRepository.GetByIdAsync);
 
             return Ok(new ResultMessageDto("Cart checked out"));
-        }
-
-        private void Checkout(Cart cart, IEnumerable<Product> products)
-        {
-            foreach (var item in cart.Items)
-            {
-                products.First(p => p.Id == item.ProductId).Stock -= item.Quantity;
-            }
-
-            cart.IsCheckedOut = true;
         }
 
         private ActionResult ValidateCartStock(Cart cart, IEnumerable<Product> products)

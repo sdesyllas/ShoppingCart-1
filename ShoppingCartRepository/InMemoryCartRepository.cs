@@ -1,12 +1,13 @@
 ﻿using ShoppingCart.Shared;
 using ShoppingCart.Shared.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ShoppingCart.Repository
 {
-    public class InMemoryCartRepository : IRepository<Cart>
+    public class InMemoryCartRepository : ICartRepository
     {
         private readonly IDataProvider<Cart> _dataProvider;
         private IEnumerable<Cart> _baskets;
@@ -19,7 +20,26 @@ namespace ShoppingCart.Repository
         public async Task<Cart> GetByNameAsync(string name)
         {
             await EnsureDataAsync();
-            return _baskets.FirstOrDefault(x => x.Name == name);
+            try
+            {
+                return _baskets.First(x => x.Name == name);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new CartNotFoundException(e);
+            }
+        }
+
+        public async Task CheckoutAsync(string cartName, Func<long, Task<Product>> productProvider)
+        {
+            var cart = await GetByNameAsync(cartName);
+            foreach (var item in cart.Items)
+            {
+                var product = await productProvider(item.ProductId);
+                product.Stock -= item.Quantity;
+            }
+
+            cart.IsCheckedOut = true;
         }
 
         private async Task EnsureDataAsync()
