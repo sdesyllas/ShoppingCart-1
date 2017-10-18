@@ -29,13 +29,19 @@ namespace ShoppingCart.Repository
             {
                 throw new ProdcutNotFoundException(e);
             }
-            
         }
 
         public async Task<Product> GetByNameAsync(string name)
         {
             await EnsureDataAsync();
-            return _products.FirstOrDefault(x => x.Name == name);
+            try
+            {
+                return _products.First(x => x.Name == name);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new ProdcutNotFoundException(e);
+            }
         }
 
         private async Task EnsureDataAsync()

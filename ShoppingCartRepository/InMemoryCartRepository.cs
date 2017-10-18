@@ -15,7 +15,7 @@ namespace ShoppingCart.Repository
 
         public InMemoryCartRepository(IDataProvider<Cart> dataProvider)
         {
-            this._dataProvider = dataProvider;
+            _dataProvider = dataProvider;
         }
 
         public async Task<Cart> GetByNameAsync(string name)
@@ -34,7 +34,12 @@ namespace ShoppingCart.Repository
         public async Task CheckoutAsync(string cartName, Func<long, Task<Product>> productProvider)
         {
             var cart = await GetByNameAsync(cartName);
-            await EnsureStock(cart, productProvider);
+            if (cart.IsCheckedOut)
+            {
+                throw new CartCheckedOutException();
+            }
+
+            await EnsureStockAsync(cart, productProvider);
 
             foreach (var item in cart.Items)
             {
@@ -45,7 +50,7 @@ namespace ShoppingCart.Repository
             cart.IsCheckedOut = true;
         }
 
-        public async Task EnsureStock(Cart cart, Func<long, Task<Product>> productProvider)
+        public async Task EnsureStockAsync(Cart cart, Func<long, Task<Product>> productProvider)
         {
             var productTasks = cart.Items
                 .GroupBy(x => x.ProductId)
@@ -62,7 +67,7 @@ namespace ShoppingCart.Repository
             }
         }
 
-        private async Task<IEnumerable<Product>> GetProductsFromCartItems(IEnumerable<CartItem> items, Func<long, Task<Product>> productProvider)
+        private async Task<IEnumerable<Product>> GetProductsFromCartItemsAsync(IEnumerable<CartItem> items, Func<long, Task<Product>> productProvider)
         {
             var productTasks = items
                 .Select(x => x.ProductId)
@@ -71,7 +76,7 @@ namespace ShoppingCart.Repository
             return await Task.WhenAll(productTasks);
         }
 
-        public async Task AddItemToCart(string cartName, Func<long, Task<Product>> productProvider, CartItem item)
+        public async Task AddItemToCartAsync(string cartName, Func<long, Task<Product>> productProvider, CartItem item)
         {
             var cart = await GetByNameAsync(cartName);
             if (cart.IsCheckedOut)

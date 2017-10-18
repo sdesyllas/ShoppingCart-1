@@ -8,6 +8,6 @@ namespace ShoppingCart.Shared
     {
         Task CheckoutAsync(string cartName, Func<long, Task<Product>> productProvider);
 
-        Task AddItemToCart(string cartName, Func<long, Task<Product>> productProvider, CartItem item);
+        Task AddItemToCartAsync(string cartName, Func<long, Task<Product>> productProvider, CartItem item);
     }
 }

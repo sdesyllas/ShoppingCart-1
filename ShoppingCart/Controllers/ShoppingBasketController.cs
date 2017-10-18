@@ -76,7 +76,7 @@ namespace ShoppingCart.Controllers
             var model = _cartItemMapper.Map<CartItem>(item);
             try
             {
-                await _cartsRepository.AddItemToCart(cartName, _productsRepository.GetByIdAsync, model);
+                await _cartsRepository.AddItemToCartAsync(cartName, _productsRepository.GetByIdAsync, model);
                 return Ok(new ResultMessageDto("Product added"));
             }
             catch (ProdcutNotFoundException)

@@ -136,7 +136,7 @@ namespace ShoppingCart.UnitTests.Controllers
             var cart = Fixture.Generate<Cart>();
 
             CartReposioryMock
-                .Setup(m => m.AddItemToCart(cart.Name, It.IsAny<Func<long, Task<Product>>>(), It.IsAny<CartItem>()))
+                .Setup(m => m.AddItemToCartAsync(cart.Name, It.IsAny<Func<long, Task<Product>>>(), It.IsAny<CartItem>()))
                 .Callback<string, Func<long, Task<Product>>, CartItem>((n, f, i) => cart.Items.Add(i))
                 .Returns(Task.CompletedTask);
 
@@ -158,7 +158,7 @@ namespace ShoppingCart.UnitTests.Controllers
         private void InitMocks(Exception cartReposioryMockExpectedException)
         {
             CartReposioryMock
-                .Setup(m => m.AddItemToCart(It.IsAny<string>(), It.IsAny<Func<long, Task<Product>>>(), It.IsAny<CartItem>()))
+                .Setup(m => m.AddItemToCartAsync(It.IsAny<string>(), It.IsAny<Func<long, Task<Product>>>(), It.IsAny<CartItem>()))
                 .Throws(cartReposioryMockExpectedException);
 
             AddCartItemMapperProviderMock.Setup(x => x.Provide())
