@@ -47,22 +47,6 @@ namespace ShoppingCart.Controllers
                 var cartDto = _cartMapper.Map<CartDto>(cart);
                 return Ok(cartDto);
             });
-            //try
-            //{
-            //    var cart = await _cartsRepository.GetByNameAsync(cartName);
-            //    var cartDto = _cartMapper.Map<CartDto>(cart);
-            //    return Ok(cartDto);
-            //}
-            //catch (CartNotFoundException)
-            //{
-            //    _logger.LogDebug($"Cart {cartName} not found");
-            //    return NotFound(new ResultMessageDto("Cart not found"));
-            //}
-            //catch (ProdcutNotFoundException)
-            //{
-            //    _logger.LogDebug($"Product on cart {cartName} does not exist in database");
-            //    return StatusCode(StatusCodes.Status500InternalServerError, new ResultMessageDto("Inconsistent database"));
-            //}
         }
 
         [HttpPut("{cartName}")]
@@ -73,10 +57,16 @@ namespace ShoppingCart.Controllers
         {
             _logger.LogDebug($"Put called with parameter: {cartName}");
 
-            var addItemValidationResult = ValidateForAddItem(item);
-            if(addItemValidationResult != null)
+            if (item == null)
             {
-                return addItemValidationResult;
+                _logger.LogDebug($"Empty body");
+                return BadRequest(new ResultMessageDto("Empty body"));
+            }
+
+            if (item.Quantity <= 0)
+            {
+                _logger.LogDebug($"Invalid quantity {item.Quantity}");
+                return BadRequest(new ResultMessageDto("Invalid quantity"));
             }
 
             var model = _cartItemMapper.Map<CartItem>(item);
@@ -85,21 +75,6 @@ namespace ShoppingCart.Controllers
                 await _cartsRepository.AddItemToCartAsync(cartName, _productsRepository.GetByIdAsync, model);
                 return Ok(new ResultMessageDto("Product added"));
             });
-        }
-
-        private ActionResult ValidateForAddItem(AddCartItemDto item)
-        {
-            if (item == null)
-            {
-                return BadRequest(new ResultMessageDto("Empty body"));
-            }
-
-            if (item.Quantity <= 0)
-            {
-                return BadRequest(new ResultMessageDto("Invalid quantity"));
-            }
-
-            return null;
         }
 
         [HttpGet("{cartName}/Checkout")]
