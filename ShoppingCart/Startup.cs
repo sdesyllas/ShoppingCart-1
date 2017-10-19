@@ -32,7 +32,7 @@ namespace ShoppingCart
             services.AddTransient(typeof(IDataProvider<Cart>), typeof(StaticCartProvider));
             services.AddSingleton(typeof(ICartRepository), typeof(InMemoryCartRepository));
             services.AddTransient(typeof(IDataProvider<Product>), x=> new ProductDataProvider(x.GetService<IFileProvider>(), Configuration.GetValue<string>("ProductsSourceFile")));
-            services.AddSingleton(typeof(IQueryableByIdRepository<Product>), typeof(InMemoryProductReposiotry));
+            services.AddSingleton(typeof(IRepository<Product>), typeof(InMemoryProductReposiotry));
             services.AddTransient(typeof(IFileProvider), x => envoirment.ContentRootFileProvider);
 
             services.AddTransient(typeof(IValueResolver<CartItem, CartItemDto, CartProductDto>), typeof(ProductDtoResolver));

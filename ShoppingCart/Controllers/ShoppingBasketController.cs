@@ -16,13 +16,13 @@ namespace ShoppingCart.Controllers
     public class ShoppingBasketController : Controller
     {
         private readonly ICartRepository _cartsRepository;
-        private readonly IQueryableByIdRepository<Product> _productsRepository;
+        private readonly IRepository<Product> _productsRepository;
         private readonly IMapper _cartMapper;
         private readonly IMapper _cartItemMapper;
         private readonly ILogger _logger;
 
         public ShoppingBasketController(ICartRepository cartsRepository,
-            IQueryableByIdRepository<Product> productsRepository,
+            IRepository<Product> productsRepository,
             IMapperProvider<Cart, CartDto> cartMapperProvider,
             IMapperProvider<AddCartItemDto, CartItem> cartItemMapper,
             ILogger<ShoppingBasketController> logger)
@@ -43,7 +43,7 @@ namespace ShoppingCart.Controllers
             _logger.LogDebug($"Get called with parameter: {cartName}");
             return await HandleExceptionsAsync(cartName, async () =>
             {
-                var cart = await _cartsRepository.GetByNameAsync(cartName);
+                var cart = await _cartsRepository.GetAsync(x=>x.Name == cartName);
                 var cartDto = _cartMapper.Map<CartDto>(cart);
                 return Ok(cartDto);
             });
@@ -72,7 +72,10 @@ namespace ShoppingCart.Controllers
             var model = _cartItemMapper.Map<CartItem>(item);
             return await HandleExceptionsAsync(cartName, async () =>
             {
-                await _cartsRepository.AddItemToCartAsync(cartName, _productsRepository.GetByIdAsync, model);
+                await _cartsRepository.AddItemToCartAsync(cartName,
+                    (x) => _productsRepository.GetAsync(p=>p.Id == x),
+                    model);
+
                 return Ok(new ResultMessageDto("Product added"));
             });
         }
@@ -86,7 +89,7 @@ namespace ShoppingCart.Controllers
             _logger.LogDebug($"Checkout called with parameter: {cartName}");
             return await HandleExceptionsAsync(cartName, async () =>
             {
-                await _cartsRepository.CheckoutAsync(cartName, _productsRepository.GetByIdAsync);
+                await _cartsRepository.CheckoutAsync(cartName, (x) => _productsRepository.GetAsync(p => p.Id == x));
                 return Ok(new ResultMessageDto("Cart checked out"));
             });
         }

@@ -18,12 +18,12 @@ namespace ShoppingCart.Repository
             _dataProvider = dataProvider;
         }
 
-        public async Task<Cart> GetByNameAsync(string name)
+        public async Task<Cart> GetAsync(Func<Cart, bool> predicate)
         {
             await EnsureDataAsync();
             try
             {
-                return _baskets.First(x => x.Name == name);
+                return _baskets.First(predicate);
             }
             catch (InvalidOperationException e)
             {
@@ -33,7 +33,7 @@ namespace ShoppingCart.Repository
 
         public async Task CheckoutAsync(string cartName, Func<long, Task<Product>> productProvider)
         {
-            var cart = await GetByNameAsync(cartName);
+            var cart = await GetAsync(x => x.Name == cartName);
             if (cart.IsCheckedOut)
             {
                 throw new CartCheckedOutException();
@@ -78,7 +78,7 @@ namespace ShoppingCart.Repository
 
         public async Task AddItemToCartAsync(string cartName, Func<long, Task<Product>> productProvider, CartItem item)
         {
-            var cart = await GetByNameAsync(cartName);
+            var cart = await GetAsync(x => x.Name == cartName);
             if (cart.IsCheckedOut)
             {
                 throw new CartCheckedOutException();

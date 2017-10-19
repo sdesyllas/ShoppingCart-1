@@ -14,7 +14,7 @@ namespace ShoppingCart.UnitTests.Controllers
     {
         protected Fixture Fixture { get; private set; }
         protected Mock<ICartRepository> CartReposioryMock { get; private set; }
-        protected Mock<IQueryableByIdRepository<Product>> ProductReposioryMock { get; private set; }
+        protected Mock<IRepository<Product>> ProductReposioryMock { get; private set; }
         protected Mock<IMapperProvider<Cart, CartDto>> MapperProviderMock { get; private set; }
         protected Mock<IMapperProvider<AddCartItemDto, CartItem>> AddCartItemMapperProviderMock { get; private set; }
         protected Mock<ILogger<ShoppingBasketController>> LoggerMock { get; private set; }
@@ -25,7 +25,7 @@ namespace ShoppingCart.UnitTests.Controllers
         {
             Fixture = new Fixture();
             CartReposioryMock = new Mock<ICartRepository>();
-            ProductReposioryMock = new Mock<IQueryableByIdRepository<Product>>();
+            ProductReposioryMock = new Mock<IRepository<Product>>();
             MapperProviderMock = new Mock<IMapperProvider<Cart, CartDto>>();
             AddCartItemMapperProviderMock = new Mock<IMapperProvider<AddCartItemDto, CartItem>>();
             LoggerMock = new Mock<ILogger<ShoppingBasketController>>();

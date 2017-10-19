@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace ShoppingCart.Shared
 {
     public interface IRepository<T>
     {
-        Task<T> GetByNameAsync(string name);
+        Task<T> GetAsync(Func<T, bool> predicate);
     }
 }

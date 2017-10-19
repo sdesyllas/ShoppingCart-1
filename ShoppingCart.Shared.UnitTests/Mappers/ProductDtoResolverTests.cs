@@ -6,6 +6,7 @@ using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Mappers;
 using ShoppingCart.Shared.Model;
 using SimpleFixture;
+using System;
 using System.Threading.Tasks;
 
 namespace ShoppingCart.Shared.UnitTests.Mappers
@@ -16,7 +17,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
         private Fixture fixture;
         private Mock<IMapper> mapperMock;
         private Mock<IMapperProvider<Product, CartProductDto>> mapperProviderMock;
-        private Mock<IQueryableByIdRepository<Product>> productRepositoryMock;
+        private Mock<IRepository<Product>> productRepositoryMock;
 
         [TestInitialize]
         public void Initialize()
@@ -24,7 +25,7 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             fixture = new Fixture();
             mapperMock = new Mock<IMapper>();
             mapperProviderMock = new Mock<IMapperProvider<Product, CartProductDto>>();
-            productRepositoryMock = new Mock<IQueryableByIdRepository<Product>>();
+            productRepositoryMock = new Mock<IRepository<Product>>();
         }
 
         [TestMethod]
@@ -32,15 +33,15 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
         {
             // Arrange
             var cartItem = fixture.Generate<CartItem>();
-            
+            var product = fixture.Generate<Product>(constraints: new { Identifier = cartItem.ProductId });
             mapperMock.Setup(x => x.Map<CartProductDto>(It.IsAny<Product>()))
                 .Returns<Product>(x => fixture.Generate<CartProductDto>(constraints: new { Id = x.Id }));
             
             mapperProviderMock.Setup(x => x.Provide())
                 .Returns(mapperMock.Object);
-            
-            productRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<long>()))
-                .Returns<long>(x => Task.FromResult(fixture.Generate<Product>(constraints: new { Identifier = x })));
+
+            productRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Func<Product, bool>>()))
+                .ReturnsAsync(product);
 
             var resolver = new ProductDtoResolver(productRepositoryMock.Object, mapperProviderMock.Object);
 
@@ -61,8 +62,8 @@ namespace ShoppingCart.Shared.UnitTests.Mappers
             mapperProviderMock.Setup(x => x.Provide())
                 .Returns(mapperMock.Object);
 
-            productRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<long>()))
-                .Returns<long>(x => Task.FromResult(null as Product));
+            productRepositoryMock.Setup(x => x.GetAsync(It.IsAny<Func<Product,bool>>()))
+                .ReturnsAsync(null as Product);
 
             var resolver = new ProductDtoResolver(productRepositoryMock.Object, mapperProviderMock.Object);
 

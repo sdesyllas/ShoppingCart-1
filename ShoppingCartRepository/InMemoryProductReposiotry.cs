@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Repository
 {
-    public class InMemoryProductReposiotry : IQueryableByIdRepository<Product>
+    public class InMemoryProductReposiotry : IRepository<Product>
     {
         private readonly IDataProvider<Product> _dataProvider;
         private IEnumerable<Product> _products;
@@ -18,25 +18,12 @@ namespace ShoppingCart.Repository
             this._dataProvider = dataProvider;
         }
 
-        public async Task<Product> GetByIdAsync(long id)
+        public async Task<Product> GetAsync(Func<Product, bool> predicate)
         {
             await EnsureDataAsync();
             try
             {
-                return _products.First(x => x.Id == id);
-            }
-            catch (InvalidOperationException e)
-            {
-                throw new ProdcutNotFoundException(e);
-            }
-        }
-
-        public async Task<Product> GetByNameAsync(string name)
-        {
-            await EnsureDataAsync();
-            try
-            {
-                return _products.First(x => x.Name == name);
+                return _products.First(predicate);
             }
             catch (InvalidOperationException e)
             {

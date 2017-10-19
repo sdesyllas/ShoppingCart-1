@@ -28,7 +28,7 @@ namespace ShoppingCart.Repository.UnitTests
             var repository = new InMemoryProductReposiotry(dataProvider.Object);
 
             // Act
-            await repository.GetByIdAsync(0);
+            await repository.GetAsync(x => x.Id == 0);
 
             // Assert exception
         }
@@ -44,45 +44,11 @@ namespace ShoppingCart.Repository.UnitTests
             var repository = new InMemoryProductReposiotry(dataProvider.Object);
 
             // Act
-            await repository.GetByIdAsync(product.Id);
+            await repository.GetAsync(x => x.Id == product.Id);
 
             // Assert
             product.Should().NotBeNull();
             product.Should().Be(product);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ProdcutNotFoundException))]
-        public async Task GetByNameAsync_When_ProductNotFound_Then_ExceptionIsThrown()
-        {
-            var dataProvider = new Mock<IDataProvider<Product>>();
-            dataProvider.Setup(x => x.ProvideAsync())
-                .ReturnsAsync(Enumerable.Empty<Product>());
-
-            var repository = new InMemoryProductReposiotry(dataProvider.Object);
-
-            // Act
-            await repository.GetByNameAsync(string.Empty);
-
-            // Assert exception
-        }
-
-        [TestMethod]
-        public async Task GetByNameAsync_When_ProductNotFound_Then_ProductIsReturned()
-        {
-            var product = new Fixture().Generate<Product>();
-            var dataProvider = new Mock<IDataProvider<Product>>();
-            dataProvider.Setup(x => x.ProvideAsync())
-                .ReturnsAsync(new List<Product>() { product });
-
-            var repository = new InMemoryProductReposiotry(dataProvider.Object);
-
-            // Act
-            var result = await repository.GetByNameAsync(product.Name);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.Should().Be(product);
         }
     }
 }

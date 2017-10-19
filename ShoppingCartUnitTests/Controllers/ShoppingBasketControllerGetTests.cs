@@ -7,6 +7,7 @@ using ShoppingCart.Repository.Exceptions;
 using ShoppingCart.Shared.Dto;
 using ShoppingCart.Shared.Model;
 using SimpleFixture;
+using System;
 using System.Threading.Tasks;
 
 namespace ShoppingCart.UnitTests.Controllers
@@ -18,7 +19,7 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Return404_When_BasketDoesNotExist()
         {
             // Arrange
-            CartReposioryMock.Setup(x => x.GetByNameAsync(It.IsAny<string>()))
+            CartReposioryMock.Setup(x => x.GetAsync(It.IsAny<Func<Cart,bool>>()))
                 .ThrowsAsync(new CartNotFoundException());
             var controller = InitController();
 
@@ -34,7 +35,7 @@ namespace ShoppingCart.UnitTests.Controllers
         public async Task Should_Reutn500_When_ProductFromBasketDoesNotExistInRepository()
         {
             CartReposioryMock
-                .Setup(x => x.GetByNameAsync(It.IsAny<string>()))
+                .Setup(x => x.GetAsync(It.IsAny<Func<Cart, bool>>()))
                 .ReturnsAsync(Fixture.Generate<Cart>());
 
             CartMapperMock.Setup(x => x.Map<CartDto>(It.IsAny<Cart>()))
@@ -60,12 +61,12 @@ namespace ShoppingCart.UnitTests.Controllers
             var cart = Task.FromResult(Fixture.Generate<Cart>());
 
             CartReposioryMock
-                .Setup(m => m.GetByNameAsync(cart.Result.Name))
+                .Setup(m => m.GetAsync(It.IsAny<Func<Cart, bool>>()))
                 .Returns(cart);
 
             foreach (var item in cart.Result.Items)
                 ProductReposioryMock
-                    .Setup(m => m.GetByIdAsync(item.ProductId))
+                    .Setup(m => m.GetAsync(It.IsAny<Func<Product, bool>>()))
                     .ReturnsAsync(Fixture.Generate<Product>(constraints: new { Identifier = item.ProductId }));
             
             CartMapperMock.Setup(m => m.Map<CartDto>(cart.Result))

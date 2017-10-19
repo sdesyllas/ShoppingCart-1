@@ -35,7 +35,7 @@ namespace ShoppingCart.Repository.UnitTests
             var repository = new InMemoryCartRepository(dataProvider.Object);
 
             // Act
-            await repository.GetByNameAsync(string.Empty);
+            await repository.GetAsync(x => x.Name == string.Empty);
 
             // Assert exception
         }
@@ -51,7 +51,7 @@ namespace ShoppingCart.Repository.UnitTests
             var repository = new InMemoryCartRepository(dataProvider.Object);
 
             // Act
-            var result = await repository.GetByNameAsync(cart.Name);
+            var result = await repository.GetAsync(x => x.Name == cart.Name);
 
             // Assert
             result.Should().NotBeNull();
