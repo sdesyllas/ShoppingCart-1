@@ -13,6 +13,7 @@ namespace ShoppingCart
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+            .UseUrls("http://*:64580")
             .UseStartup<Startup>()
             .UseContentRoot(Directory.GetCurrentDirectory())
             .Build();
