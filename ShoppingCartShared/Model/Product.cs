@@ -1,5 +1,8 @@
 ﻿namespace ShoppingCart.Shared.Model
 {
+    /// <summary>
+    /// Model for a product
+    /// </summary>
     public class Product
     {
         public long Id { get; }

@@ -2,6 +2,9 @@
 
 namespace ShoppingCart.Shared.Model
 {
+    /// <summary>
+    /// Model for a shopping basket
+    /// </summary>
     public class Cart
     {
         public string Name { get; private set; }

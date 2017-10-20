@@ -1,11 +1,11 @@
 # ShoppingCart
-Simple web API developed with ASP.NET Core for handling shoping baskets.
+Simple web API developed with ASP.NET Core for handling shopping baskets.
 
 Assumptions
 - Static list of baskets (cart1, cart2) with no option to create, delete
-- Product definitons and stock provided from csv file
-- In memory "database" - no data persistance, reaload after application restart
-- Cart item can contian multiple entires for same product. Each entry cannot exceed current stock. Quantity aggeregation and validation is made on checkout 
+- Product definitions and stock provided from csv file
+- In memory "database" - no data persistence, reload after application restart
+- Cart item can contain multiple entries for same product. Each entry cannot exceed current stock. Quantity aggregation and validation is made on checkout 
 
 Tools
 - AutoMapper
@@ -16,8 +16,9 @@ Tools
 - SimpleFixture 
 
 Further development
-- Data persistance
+- Data persistence
 - Thread safe stock operations
+- Builder pattern for code duplication in unit tests
 
 
 Working version could be obtained via docker:
@@ -30,3 +31,4 @@ docker run -p 64580:64580 -e "ASPNETCORE_URLS=http://+:64580" -it --rm zaniu/tes
 and go to:
 
 http://localhost:64580/swagger/
+

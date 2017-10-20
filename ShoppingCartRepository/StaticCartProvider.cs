@@ -5,8 +5,15 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Repository
 {
+    /// <summary>
+    /// Provides predefinded <see cref="Cart"/> collection.
+    /// </summary>
     public class StaticCartProvider : IDataProvider<Cart>
     {
+        /// <summary>
+        /// Provides predefined <see cref="Cart"/> collection as async operation
+        /// </summary>
+        /// <returns><see cref="Cart"/> collection as async operation</returns>
         public async Task<IEnumerable<Cart>> ProvideAsync()
         {
             return await Task.FromResult(new List<Cart>()

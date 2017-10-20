@@ -1,5 +1,8 @@
 ﻿namespace ShoppingCart.Shared.Dto
 {
+    /// <summary>
+    /// Dto for cart item product
+    /// </summary>
     public class CartProductDto
     {
         public long Id { get; set; }
