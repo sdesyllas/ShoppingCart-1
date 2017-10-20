@@ -123,6 +123,10 @@ namespace ShoppingCart.Controllers
             {
                 return BadRequest(new ResultMessageDto("Not enough stock"));
             }
+            catch (Exception)
+            {
+                return StatusCode(500, "Unexpected error");
+            }
         }
     }
 }
