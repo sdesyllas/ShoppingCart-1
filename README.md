@@ -18,7 +18,7 @@ Tools
 Further development
 - Data persistence
 - Thread safe stock operations
-- Builder pattern for code duplication in unit tests
+- Builder pattern for stubs creation to avoid code duplication in unit tests 
 
 
 Working version could be obtained via docker:
