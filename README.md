@@ -26,6 +26,7 @@ https://hub.docker.com/r/zaniu/test/
 docker pull zaniu/test:latest
 
 docker run -p 64580:64580 -e "ASPNETCORE_URLS=http://+:64580" -it --rm zaniu/test:latest
+
 and go to:
 
 http://localhost:64580/swagger/
