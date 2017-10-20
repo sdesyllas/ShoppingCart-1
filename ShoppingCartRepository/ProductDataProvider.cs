@@ -22,7 +22,7 @@ namespace ShoppingCart.Repository
 
         public async Task<IEnumerable<Product>> ProvideAsync()
         {
-            var file = _fileProvider.GetFileInfo(_dataFileName);
+            var file = _fileProvider.GetDirectoryContents("App_data").First(x => x.Name == _dataFileName);
             using (FileStream stream = (FileStream)file.CreateReadStream())
             {
                 using (StreamReader reader = new StreamReader(stream))
